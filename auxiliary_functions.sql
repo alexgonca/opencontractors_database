@@ -21,24 +21,36 @@ $BODY$ LANGUAGE plpgsql VOLATILE;
 DROP FUNCTION IF EXISTS left_text();
 
 CREATE OR REPLACE FUNCTION left_text(field TEXT) RETURNS TEXT AS $$
+DECLARE
+  aux TEXT;
 BEGIN
   IF position(':' in field) = 0 THEN
-    RETURN field;
+    aux = UPPER(TRIM(BOTH FROM field));
   ELSE
-    RETURN UPPER(TRIM(BOTH FROM substring(field from 1 for position(':' in field) - 1)));
+    aux = UPPER(TRIM(BOTH FROM substring(field from 1 for position(':' in field) - 1)));
   END IF;
+  IF aux !~ '[a-zA-Z0-9]' OR aux = '' THEN
+    aux = NULL;
+  END IF;
+  RETURN aux;
 END;
 $$ LANGUAGE plpgsql;
 
 DROP FUNCTION IF EXISTS right_text();
 
 CREATE OR REPLACE FUNCTION right_text(field TEXT) RETURNS TEXT AS $$
+DECLARE
+  aux TEXT;
 BEGIN
   IF position(':' in field) = 0 THEN
-    RETURN '';
+    aux = NULL;
   ELSE
-    RETURN TRIM(BOTH FROM substring(field from position(':' in field) + 1));
+    aux = TRIM(BOTH FROM substring(field from position(':' in field) + 1));
   END IF;
+  IF aux !~ '[a-zA-Z0-9]' OR aux = '' THEN
+    aux = NULL;
+  END IF;
+  RETURN aux;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -66,6 +78,29 @@ BEGIN
   END CASE;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION letter_contract(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE left_text(field)
+      WHEN 'N', 'Y' THEN
+        RETURN 'Y';
+      ELSE
+        RETURN left_text(field);
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION contract_financing(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE left_text(field)
+      WHEN 'B', 'N', 'X' THEN
+        RETURN 'X';
+      ELSE
+        RETURN left_text(field);
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
 
 DROP FUNCTION IF EXISTS contract_action_type();
 
@@ -220,5 +255,68 @@ BEGIN
       RETURN new_code;
     END IF;
   END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION place_of_manufacture(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE left_text(field)
+    WHEN '' THEN
+      RETURN NULL;
+    WHEN '1', '!', 'S', 'U' THEN
+      RETURN 'X';
+    ELSE
+      RETURN left_text(field);
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION a76action(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE field
+    WHEN 'Yes' THEN
+      RETURN 'Y';
+    WHEN 'No' THEN
+      RETURN 'N';
+    ELSE
+      RETURN field;
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION solicitation_procedures(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE left_text(field)
+    WHEN 'M', 'N' THEN
+      RETURN 'X';
+    WHEN 'NONE' THEN
+      RETURN NULL;
+    ELSE
+      RETURN left_text(field);
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION local_area_set_aside(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE field
+    WHEN 'BSDF' THEN
+      RETURN 'X';
+    ELSE
+      RETURN field;
+  END CASE;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION is_dot_certified(field TEXT) RETURNS CHAR AS $$
+BEGIN
+  CASE field
+    WHEN 'true' THEN
+      RETURN 'Y';
+    ELSE
+      RETURN field;
+  END CASE;
 END;
 $$ LANGUAGE plpgsql;

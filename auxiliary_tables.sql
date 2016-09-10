@@ -71,7 +71,7 @@ VALUES
 ON CONFLICT(code)
 DO NOTHING;
 
-CREATE TABLE type_of_contract_pricing (
+CREATE TABLE IF NOT EXISTS type_of_contract_pricing (
   code        CHAR CONSTRAINT pk_type_of_contract_pricing PRIMARY KEY,
   description TEXT
 );
@@ -128,7 +128,7 @@ insert into subcontract_plan
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE letter_contract (
+CREATE TABLE IF NOT EXISTS letter_contract (
   code        CHAR CONSTRAINT pk_letter_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -148,7 +148,7 @@ ON CONFLICT (code)
 DO NOTHING;
 
 
-CREATE TABLE multiyear_contract (
+CREATE TABLE IF NOT EXISTS multiyear_contract (
   code        CHAR CONSTRAINT pk_multiyear_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -162,7 +162,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE performance_based_service_contract (
+CREATE TABLE IF NOT EXISTS performance_based_service_contract (
   code        CHAR CONSTRAINT pk_performance_based_service_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -180,7 +180,7 @@ insert into performance_based_service_contract
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE contract_financing (
+CREATE TABLE IF NOT EXISTS contract_financing (
   code        CHAR CONSTRAINT pk_contract_financing PRIMARY KEY,
   description TEXT
 );
@@ -197,7 +197,7 @@ insert into contract_financing
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE cost_or_pricing_data (
+CREATE TABLE IF NOT EXISTS cost_or_pricing_data (
   code        CHAR CONSTRAINT pk_cost_or_pricing_data PRIMARY KEY,
   description TEXT
 );
@@ -210,7 +210,7 @@ insert into cost_or_pricing_data
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE cost_accounting_standards_clause (
+CREATE TABLE IF NOT EXISTS cost_accounting_standards_clause (
   code        CHAR CONSTRAINT pk_cost_accounting_standards_clause PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -225,7 +225,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE purchase_card_as_payment_method (
+CREATE TABLE IF NOT EXISTS purchase_card_as_payment_method (
   code        CHAR CONSTRAINT pk_purchase_card_as_payment_method PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS national_interest_action (
   description TEXT
 );
 
-CREATE TABLE contingency_humanitarian_peacekeeping_operation (
+CREATE TABLE IF NOT EXISTS contingency_humanitarian_peacekeeping_operation (
   code        VARCHAR(1) CONSTRAINT pk_contingency_humanitarian_peacekeeping_operation PRIMARY KEY,
   description TEXT
 );
@@ -253,7 +253,9 @@ insert into contingency_humanitarian_peacekeeping_operation
 (code, description) VALUES
 ('A', 'Contingency operation as defined in 10 U.S.C. 101(a)(13)'),
 ('B', 'Humanitarian or peacekeeping operation as defined in 10 U.S.C. 2302(8)'),
-('X', 'Neither contingency nor humanitarian or peacekeeping operation');
+('X', 'Neither contingency nor humanitarian or peacekeeping operation')
+ON CONFLICT (code)
+DO NOTHING;
 
 insert into national_interest_action
 (code, description)
@@ -286,7 +288,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE recovery_flag (
+CREATE TABLE IF NOT EXISTS recovery_flag (
   code        TEXT CONSTRAINT pk_recovery_flag PRIMARY KEY,
   description TEXT
 );
@@ -297,7 +299,7 @@ insert into recovery_flag
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE type_of_idc (
+CREATE TABLE IF NOT EXISTS type_of_idc (
   code        CHAR CONSTRAINT pk_type_of_idc PRIMARY KEY,
   description TEXT
 );
@@ -310,7 +312,7 @@ insert into type_of_idc
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE multiple_or_single_award_idc (
+CREATE TABLE IF NOT EXISTS multiple_or_single_award_idc (
   code        CHAR CONSTRAINT pk_multiple_or_single_award_idc PRIMARY KEY,
   name        TEXT,
   description TEXT
@@ -6350,7 +6352,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table gfe_gfp
+create table IF NOT EXISTS gfe_gfp
 (
   code CHAR constraint fk_gfe_gfp PRIMARY KEY,
   description TEXT
@@ -6495,7 +6497,7 @@ insert into manufacturing_organization_type
 ON CONFLICT (code)
 DO NOTHING;
 
-create table extent_competed
+create table IF NOT EXISTS extent_competed
 (
   code VARCHAR(3) CONSTRAINT pk_extent_competed PRIMARY KEY,
   name TEXT,
@@ -6589,7 +6591,7 @@ insert into small_business_competitiveness_demonstration_program
 ON CONFLICT (code)
 DO NOTHING;
 
-create table a76action
+create table IF NOT EXISTS a76action
 (
   code CHAR CONSTRAINT pk_a76action PRIMARY KEY,
   name VARCHAR(3),
@@ -6599,9 +6601,11 @@ create table a76action
 insert into a76action
 (code, name, description) VALUES
 ('Y', 'Yes', 'Contract action resulted from an A-76/Fair Act competitive sourcing process.'),
-('N', 'No', 'Contract action did not result from an A-76/Fair Act competitive sourcing process.');
+('N', 'No', 'Contract action did not result from an A-76/Fair Act competitive sourcing process.')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table solicitation_procedures
+create table IF NOT EXISTS solicitation_procedures
 (
   code VARCHAR(4) CONSTRAINT pk_solicitation_procedures PRIMARY KEY,
   name TEXT,
@@ -6619,9 +6623,11 @@ insert into solicitation_procedures
   ('AS', 'Alternative Sources', 'Report this code if the action resulted from the use of procedures that provide for full and open competition after exclusion of sources to reduce overall costs pursuant to FAR 6.202(a)(1), to have a facility available for national defense or industrial mobilization pursuant to FAR 6.202(a)(2), to establish or maintain an essential engineering, research, or development capability pursuant to FAR 6.202(a)(3), to ensure the continuous availability of a reliable source of supply for such property or service pursuant to FAR 6.202(a)(4), to satisfy projected needs for such product or service based on a history of high demand pursuant to FAR 6.202(a)(5), to satisfy a critical need for medical, safety, or emergency supplies pursuant to FAR 6.202(a)(6).'),
   ('SSS', 'Only One Source', 'Report this code if no solicitation procedure was used in this action.'),
   ('MAFO', 'Subject to Multiple Award Fair opportunity (pre CLOD: Multiple Award Fair opportunity)', 'Report this code if order was Subject to Multiple Award Fair Opportunity.'),
-  ('X', 'Invalid option', 'Error in usaspeding.gov data');
+  ('X', 'Invalid option', 'Error in usaspeding.gov data')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table type_of_set_aside
+create table IF NOT EXISTS type_of_set_aside
 (
   code VARCHAR(8) CONSTRAINT pk_type_of_set_aside PRIMARY KEY,
   name TEXT,
@@ -6660,7 +6666,7 @@ insert into type_of_set_aside
 on conflict (code)
 do nothing;
 
-create table local_area_set_aside
+create table IF NOT EXISTS local_area_set_aside
 (
   code CHAR CONSTRAINT fk_local_area_set_aside PRIMARY KEY,
   description TEXT
@@ -6674,7 +6680,7 @@ insert into local_area_set_aside
 on conflict (code)
 do nothing;
 
-create table evaluated_preference
+create table IF NOT EXISTS evaluated_preference
 (
   code VARCHAR(4) CONSTRAINT pk_evaluated_preference PRIMARY KEY,
   name TEXT,
@@ -6687,9 +6693,11 @@ insert into evaluated_preference
   ('SDA', 'SDB Price Evaluation Adjustment', 'Report this code for an award made through full and open competition with award to a small disadvantaged business as a result of the application of a price evaluation adjustment pursuant to FAR 19.11. This value cannot be selected after 10/13/2014.'),
   ('SPS', 'SDB Preferential Consideration Partial SB Set Aside', 'Report this code if the award was made through Full and Open Competition after Exclusion of Sources pursuant to FAR 6.2. Enter this code if the action was a partial set-aside for small business and - Partial SB Set-Aside preferential consideration resulted in an award to an SDB. This value cannot be selected after 10/13/2014.'),
   ('HZE', 'HUBZone Price Evaluation Preference', 'Report this code if the award was made through full and open competition with award to a HUBZone small business concern as a result of the HUBZone price evaluation preference. See FAR 19.1307'),
-  ('HSD', 'Combined HUB/SDB Preference', 'Report this code if the award was made through full and open competition after the application of both the HUBZone Price Evaluation Adjustment Preference (FAR 19.13)and the Small Disadvantaged Business Price Evaluation Adjustment per FAR 19.11. This value cannot be selected after 10/13/2014.');
+  ('HSD', 'Combined HUB/SDB Preference', 'Report this code if the award was made through full and open competition after the application of both the HUBZone Price Evaluation Adjustment Preference (FAR 19.13)and the Small Disadvantaged Business Price Evaluation Adjustment per FAR 19.11. This value cannot be selected after 10/13/2014.')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table fedbizopps
+create table IF NOT EXISTS fedbizopps
 (
   code CHAR CONSTRAINT pk_fedbizopps PRIMARY KEY,
   name TEXT,
@@ -6700,9 +6708,11 @@ insert into fedbizopps
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction subject to FedBizOpps'),
   ('N', 'No', 'Transaction subject to FAR 5.102 or 5.202 exception'),
-  ('X', 'Not Applicable', 'Transaction with Action Obligation less than or equal to $25K');
+  ('X', 'Not Applicable', 'Transaction with Action Obligation less than or equal to $25K')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table research
+create table IF NOT EXISTS research
 (
   code VARCHAR(3) CONSTRAINT fk_research PRIMARY KEY,
   name TEXT,
@@ -6716,9 +6726,11 @@ insert into research
   ('SR3', 'SBIR Program Phase III Action', 'Use this code if the award was related to a Phase III contract in support of the Small Business Innovation Research (SBIR) Program'),
   ('ST1', 'STTR Phase I', 'Use this code if the award was related to a Phase I contract in support of the Small Technology Transfer Research (STTR) Program'),
   ('ST2', 'STTR Phase II', 'Use this code if the award was related to a Phase II contract in support of the Small Technology Transfer Research (STTR) Program'),
-  ('ST3', 'STTR Phase III', 'Use this code if the award was related to a Phase III contract in support of the Small Technology Transfer Research (STTR) Program');
+  ('ST3', 'STTR Phase III', 'Use this code if the award was related to a Phase III contract in support of the Small Technology Transfer Research (STTR) Program')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table statutory_exception_to_fair_opportunity
+create table IF NOT EXISTS statutory_exception_to_fair_opportunity
 (
   code VARCHAR(4) CONSTRAINT pk_statutory_exception_to_fair_opportunity PRIMARY KEY,
   name TEXT,
@@ -6734,7 +6746,9 @@ insert into statutory_exception_to_fair_opportunity
   ('OSA', 'Other Statutory Authority', 'Report this code when the action was justified pursuant to a statutory authority that expressly authorizes or requires that the purchase be made from a specified source. This code is valid for Civilian agencies effective 10/31/2009.'),
   ('FAIR', 'Fair Opportunity Given (pre CLOD: No Exception - Fair Opportunity Given)', 'Report this code if Fair Opportunity was given on this order This code is valid for Civilian agencies effective 10/31/2009.'),
   ('CSA', 'Competitive Set Aside', 'Report this code if action was justified pursuant FAR 19.502-4 and in accordance with 1331 of Public Law 110240. Applies to actions signed on/later than 11/02/2012.'),
-  ('SS', 'Sole Source', 'Report this code if action was justified pursuant FAR 19.502-4 and in accordance with 1331 of Public Law 110240. Applies to actions signed on/later than 11/02/2012.');
+  ('SS', 'Sole Source', 'Report this code if action was justified pursuant FAR 19.502-4 and in accordance with 1331 of Public Law 110240. Applies to actions signed on/later than 11/02/2012.')
+ON CONFLICT (code)
+DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS flag_value(
   code CHAR CONSTRAINT pk_flag_value PRIMARY KEY,
@@ -6849,7 +6863,7 @@ VALUES
 on conflict(flag_name)
 do nothing;
 
-create table walsh_healy_act
+create table IF NOT EXISTS walsh_healy_act
 (
   code CHAR CONSTRAINT pk_walsh_healy_act PRIMARY KEY,
   name TEXT,
@@ -6860,9 +6874,11 @@ insert into walsh_healy_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Walsh Healy Act.'),
   ('N', 'No', 'Transaction is not subject to Walsh Healy Act.'),
-  ('X', 'Not Applicable', 'Walsh Healy Act is not applicable for the transaction - not supplies manufacturing.');
+  ('X', 'Not Applicable', 'Walsh Healy Act is not applicable for the transaction - not supplies manufacturing.')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table service_contract_act
+create table IF NOT EXISTS service_contract_act
 (
   code CHAR CONSTRAINT pk_service_contract_act PRIMARY KEY,
   name TEXT,
@@ -6873,9 +6889,11 @@ insert into service_contract_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Service Contract Act.'),
   ('N', 'No', 'Transaction is not subject to Service Contract Act.'),
-  ('X', 'Not Applicable', 'Service Contract Act is not applicable for the transaction - not services.');
+  ('X', 'Not Applicable', 'Service Contract Act is not applicable for the transaction - not services.')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table davis_bacon_act
+create table IF NOT EXISTS davis_bacon_act
 (
   code CHAR CONSTRAINT pk_davis_bacon_act PRIMARY KEY,
   name TEXT,
@@ -6886,10 +6904,11 @@ insert into davis_bacon_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Davis Bacon Act.'),
   ('N', 'No', 'Transaction is not subject to Davis Bacon Act.'),
-  ('X', 'Not Applicable', 'Davis Bacon Act is not applicable for the transaction - not construction.');
+  ('X', 'Not Applicable', 'Davis Bacon Act is not applicable for the transaction - not construction.')
+ON CONFLICT (code)
+DO NOTHING;
 
-
-create table clinger_cohen_act
+create table IF NOT EXISTS clinger_cohen_act
 (
   code CHAR CONSTRAINT pk_clinger_cohen_act PRIMARY KEY,
   name TEXT,
@@ -6899,9 +6918,11 @@ create table clinger_cohen_act
 insert into clinger_cohen_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Clinger Cohen Act compliance.'),
-  ('N', 'No', 'Transaction is not subject to Clinger Cohen Act compliance.');
+  ('N', 'No', 'Transaction is not subject to Clinger Cohen Act compliance.')
+ON CONFLICT (code)
+DO NOTHING;
 
-create table interagency_contracting_authority
+create table IF NOT EXISTS interagency_contracting_authority
 (
   code CHAR CONSTRAINT pk_interagency_contracting_authority PRIMARY KEY,
   name TEXT,
@@ -6912,10 +6933,11 @@ insert into interagency_contracting_authority
 (code, name, description) VALUES
 ('A', 'Economy Act', 'Report this code if the transaction is subject to the Economy Act.'),
 ('B', 'Other Statutory Authority', 'Transaction is subject to other interagency contracting Statutory Authority.'),
-('X', 'Not Applicable(the field does not apply)', 'No Statutory Authority applies to the transaction');
+('X', 'Not Applicable(the field does not apply)', 'No Statutory Authority applies to the transaction')
+ON CONFLICT (code)
+DO NOTHING;
 
-
-CREATE TABLE business_size(
+CREATE TABLE IF NOT EXISTS business_size(
   code CHAR CONSTRAINT pk_business_size PRIMARY KEY,
   description TEXT
 );

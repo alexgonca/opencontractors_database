@@ -1,4 +1,21 @@
-DROP FUNCTION IF EXISTS small_distinct();
+--
+--
+-- GENERIC FUNCTIONS
+--
+--
+
+
+CREATE OR REPLACE FUNCTION nullify_text(field TEXT) RETURNS TEXT AS $$
+DECLARE
+  aux TEXT;
+BEGIN
+  aux := TRIM(BOTH FROM field);
+  IF aux !~ '[a-zA-Z0-9]' OR aux = '' THEN
+    aux := NULL;
+  END IF;
+  RETURN aux;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION small_distinct(
   tableName VARCHAR, fieldName VARCHAR, sample ANYELEMENT = '' :: VARCHAR)
@@ -18,14 +35,12 @@ BEGIN
 END;
 $BODY$ LANGUAGE plpgsql VOLATILE;
 
-DROP FUNCTION IF EXISTS left_text();
-
 CREATE OR REPLACE FUNCTION left_text(field TEXT) RETURNS TEXT AS $$
 DECLARE
   aux TEXT;
 BEGIN
   IF position(':' in field) = 0 THEN
-    aux = UPPER(TRIM(BOTH FROM field));
+    aux = UPPER(field);
   ELSE
     aux = UPPER(TRIM(BOTH FROM substring(field from 1 for position(':' in field) - 1)));
   END IF;
@@ -35,8 +50,6 @@ BEGIN
   RETURN aux;
 END;
 $$ LANGUAGE plpgsql;
-
-DROP FUNCTION IF EXISTS right_text();
 
 CREATE OR REPLACE FUNCTION right_text(field TEXT) RETURNS TEXT AS $$
 DECLARE
@@ -54,8 +67,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS validate_date();
-
 CREATE OR REPLACE FUNCTION validate_date(field TEXT) RETURNS DATE AS $$
 BEGIN
   IF field = '01/01/1900' THEN
@@ -66,7 +77,70 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP FUNCTION IF EXISTS funded_by_foreign_entity();
+CREATE OR REPLACE FUNCTION validate_state(field TEXT) RETURNS TEXT AS $$
+DECLARE
+  aux_code TEXT;
+  new_code TEXT;
+BEGIN
+  if field is null THEN
+    RETURN NULL;
+  ELSEIF field = ':' THEN
+    RETURN NULL;
+  ELSE
+    aux_code := left_text(field);
+    if length(aux_code) = 2 then
+      RETURN aux_code;
+    ELSE
+      aux_code := right_text(field);
+      SELECT code
+      INTO STRICT new_code
+      FROM state
+      WHERE description = aux_code;
+      RETURN new_code;
+    END IF;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION validate_country(field TEXT) RETURNS TEXT AS $$
+DECLARE
+  aux_code TEXT;
+  new_code TEXT;
+BEGIN
+  if field is null THEN
+    RETURN NULL;
+  ELSEIF field = ':' THEN
+    RETURN NULL;
+  ELSE
+    aux_code := left_text(field);
+    if length(aux_code) <= 3 then
+      CASE aux_code
+        WHEN 'DE1' THEN
+          RETURN 'DEU';
+        WHEN 'JP1', 'JTN' THEN
+          RETURN 'JPN';
+        WHEN 'UA1', 'US:', 'US' THEN
+          RETURN 'USA';
+        ELSE
+          RETURN aux_code;
+      END CASE;
+    ELSE
+      SELECT code
+      INTO STRICT new_code
+      FROM country_variation
+      WHERE name = aux_code;
+      RETURN new_code;
+    END IF;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+--
+--
+-- SPECIFIC FUNCTIONS
+--
+--
 
 CREATE OR REPLACE FUNCTION funded_by_foreign_entity(field TEXT) RETURNS CHAR AS $$
 BEGIN
@@ -100,9 +174,6 @@ BEGIN
   END CASE;
 END;
 $$ LANGUAGE plpgsql;
-
-
-DROP FUNCTION IF EXISTS contract_action_type();
 
 CREATE OR REPLACE FUNCTION contract_action_type(field TEXT) RETURNS TEXT AS $$
 BEGIN
@@ -185,38 +256,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION validate_country(field TEXT) RETURNS TEXT AS $$
-DECLARE
-  aux_code TEXT;
-  new_code TEXT;
-BEGIN
-  if field is null THEN
-    RETURN NULL;
-  ELSEIF field = ':' THEN
-    RETURN NULL;
-  ELSE
-    aux_code := left_text(field);
-    if length(aux_code) <= 3 then
-      CASE aux_code
-        WHEN 'DE1' THEN
-          RETURN 'DEU';
-        WHEN 'JP1', 'JTN' THEN
-          RETURN 'JPN';
-        WHEN 'UA1', 'US:', 'US' THEN
-          RETURN 'USA';
-        ELSE
-          RETURN aux_code;
-      END CASE;
-    ELSE
-      SELECT code
-      INTO STRICT new_code
-      FROM country_variation
-      WHERE name = aux_code;
-      RETURN new_code;
-    END IF;
-  END IF;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION ccr_exception(field CHAR) RETURNS CHAR AS $$
 BEGIN
@@ -233,30 +272,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION validate_state(field TEXT) RETURNS TEXT AS $$
-DECLARE
-  aux_code TEXT;
-  new_code TEXT;
-BEGIN
-  if field is null THEN
-    RETURN NULL;
-  ELSEIF field = ':' THEN
-    RETURN NULL;
-  ELSE
-    aux_code := left_text(field);
-    if length(aux_code) = 2 then
-      RETURN aux_code;
-    ELSE
-      aux_code := right_text(field);
-      SELECT code
-      INTO STRICT new_code
-      FROM state
-      WHERE description = aux_code;
-      RETURN new_code;
-    END IF;
-  END IF;
-END;
-$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION place_of_manufacture(field TEXT) RETURNS CHAR AS $$
 BEGIN

@@ -859,11 +859,10 @@ CREATE TABLE IF NOT EXISTS contract_all (
 );
 
 CREATE TABLE IF NOT EXISTS contract (
-  id INT CONSTRAINT pk_contract PRIMARY KEY,
+  id SERIAL CONSTRAINT pk_contract PRIMARY KEY,
   unique_transaction_id VARCHAR(32) NOT NULL,
   last_modified_date DATE NOT NULL,
   CONSTRAINT u_contract unique (unique_transaction_id, last_modified_date),
-  query_progress INT,
   transaction_status VARCHAR(6),
   CONSTRAINT fk2_transaction_status FOREIGN KEY (transaction_status) REFERENCES transaction_status(status),
   dollars_obligated MONEY,

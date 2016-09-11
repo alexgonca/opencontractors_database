@@ -1,4 +1,4 @@
-COPY contract
+\copy contract
 (
   unique_transaction_id,
   last_modified_date,
@@ -234,6 +234,4 @@ COPY contract
   prime_awardee_executive5,
   prime_awardee_executive5_compensation,
   interagency_contracting_authority
-) FROM
-:csvfile
-CSV HEADER;
+) FROM './result.csv';

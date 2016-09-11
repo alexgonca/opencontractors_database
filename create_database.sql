@@ -858,6 +858,8 @@ CREATE TABLE IF NOT EXISTS contract_all (
   CONSTRAINT fk_interagency_contracting_authority FOREIGN KEY (interagency_contracting_authority) REFERENCES interagency_contracting_authority(code)
 );
 
+drop table contract;
+
 CREATE TABLE IF NOT EXISTS contract (
   id SERIAL CONSTRAINT pk_contract PRIMARY KEY,
   unique_transaction_id VARCHAR(32) NOT NULL,
@@ -964,7 +966,7 @@ CREATE TABLE IF NOT EXISTS contract (
   contractor_duns_number VARCHAR(9),
   contractor_parent_duns_number VARCHAR(9),
   contractor_phone_number TEXT,
-  contractor_fax_no TEXT,
+  contractor_fax_number TEXT,
   contractor_registration_date DATE,
   contractor_renewal_date DATE,
   contractor_parent_name TEXT,

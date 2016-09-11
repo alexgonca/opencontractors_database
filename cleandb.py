@@ -3,6 +3,7 @@ import glob
 import csv
 import constants
 import re
+from time import strftime
 
 #
 # Generic functions:
@@ -457,6 +458,8 @@ parser.add_argument('destination',
                     help="File with the cleaned data.")
 args = parser.parse_args()
 
+print(strftime("%Y-%m-%d %H:%M:%S"))
+
 with open(args.destination, 'wb') as csv_out:
     writer = csv.DictWriter(csv_out, fieldnames=constants.NEW_FIELDS)
     writer.writeheader()
@@ -467,3 +470,5 @@ with open(args.destination, 'wb') as csv_out:
                 writer.writerow(transform_row(row))
 
 print('Done!')
+
+print(strftime("%Y-%m-%d %H:%M:%S"))

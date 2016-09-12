@@ -1,0 +1,21 @@
+2000
+2001
+ubuntu@ip-172-31-18-76:~/opencontractorsdatabasev2$ ./doall.sh
+2002 COPY 498334
+2003 COPY 622562
+2004 COPY 751009
+2005 ERROR:  insert or update on table "contract" violates foreign key constraint "fk2_claimant_program"
+DETAIL:  Key (claimant_program)=(A30) is not present in table "claimant_program".
+2006 COPY 1365858
+2007 ERROR:  insert or update on table "contract" violates foreign key constraint "fk2_claimant_program"
+DETAIL:  Key (claimant_program)=(S10) is not present in table "claimant_program".
+2008 ERROR:  insert or update on table "contract" violates foreign key constraint "fk2_claimant_program"
+DETAIL:  Key (claimant_program)=(B90) is not present in table "claimant_program".
+2009 ERROR:  insert or update on table "contract" violates foreign key constraint "fk2_claimant_program"
+DETAIL:  Key (claimant_program)=(A70) is not present in table "claimant_program".
+2010 COPY 1565498
+2011 COPY 1545555
+2012 COPY 1457457
+2013 COPY 1331886
+2014 COPY 1346344
+2015 COPY 3180404

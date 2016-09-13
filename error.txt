@@ -19,3 +19,47 @@ DETAIL:  Key (claimant_program)=(A70) is not present in table "claimant_program"
 2013 COPY 1331886
 2014 COPY 1346344
 2015 COPY 3180404
+2016 COPY 2104283
+
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(b13508cfca366a46eeaad008e881acfc, 2006-02-12) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(50c4bbed45c153767bafd333c8553c87, 2006-02-12) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(a753a21ef8424c2e98aab82e718f7dbe, 2008-11-16) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(1440424dfb088a9926ae23ed53ed6879, 2007-12-01) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(831c30a82097e3cfacdd0341c9806a7f, 2006-02-12) already exists.
+CONTEXT:  COPY contract, line 2
+COPY 1422625
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(9567bc87dc16f45499267be53eef3ac4, 2006-09-01) already exists.
+CONTEXT:  COPY contract, line 2
+COPY 1471528
+COPY 1597893
+COPY 1518637
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(5606564ae5e5ec118c21d1a25ddbeaff, 2009-10-01) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(8e7a938f4b5e1c55f56ef4b2b8eb59ed, 2010-10-06) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(b0d88baa3a0719bce9876067dfdf32d0, 2011-10-11) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(2ceff635c43daf3740f731a1645e78dc, 2012-10-03) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(60825bbbcb28b45095e7b810709eb2f5, 2013-10-10) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(b8baac116086857004a98ebeb3a8f2df, 2014-10-01) already exists.
+CONTEXT:  COPY contract, line 2
+ERROR:  duplicate key value violates unique constraint "u_contract"
+DETAIL:  Key (unique_transaction_id, last_modified_date)=(81a151ea700844c68c3786f79e4b4f9c, 2015-10-01) already exists.
+CONTEXT:  COPY contract, line 2

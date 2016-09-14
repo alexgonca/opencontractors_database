@@ -1,3 +1,5 @@
+\timing
+
 INSERT INTO department
 (department_id, frequency, first, last)
   SELECT

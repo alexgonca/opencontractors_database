@@ -243,6 +243,8 @@ CREATE TABLE IF NOT EXISTS contractor_organizational_type (
 DROP TABLE IF EXISTS contractor_number_of_employees;
 
 
+
+
 CREATE TABLE IF NOT EXISTS contractor_number_of_employees (
   id SERIAL CONSTRAINT pk_contractor_number_of_employees PRIMARY KEY,
   duns_number         VARCHAR(9),

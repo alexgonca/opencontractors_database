@@ -27,8 +27,20 @@ CREATE TABLE IF NOT EXISTS agency (
   agency_id     VARCHAR(4) CONSTRAINT pk_agency PRIMARY KEY,
   frequency     INT,
   first         DATE,
-  last          DATE,
-  department_id VARCHAR(4) CONSTRAINT fk_agency_department REFERENCES department (department_id)
+  last          DATE
+);
+
+DROP TABLE IF EXISTS agency_department;
+
+CREATE TABLE IF NOT EXISTS agency_department (
+  id          SERIAL CONSTRAINT pk_agency_department PRIMARY KEY,
+  agency_id   VARCHAR(4),
+  department_id VARCHAR(4) CONSTRAINT fk_agency_department REFERENCES department (department_id),
+  frequency   INT,
+  first       DATE,
+  last        DATE,
+  CONSTRAINT u_agency_department UNIQUE (agency_id, department_id),
+  CONSTRAINT fk_agency_deparment_agency FOREIGN KEY (agency_id) REFERENCES agency (agency_id)
 );
 
 DROP TABLE IF EXISTS agency_name;

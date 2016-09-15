@@ -20,125 +20,153 @@
 -- INSERT 0 1
 -- Time: 355458.435 ms
 
-INSERT INTO department
-(department_id, frequency, first, last)
-  SELECT
-    funding_department_id,
-    count(*)                AS frequency,
-    min(last_modified_date) AS first,
-    max(last_modified_date) AS last
-  FROM contract
-  WHERE funding_department_id IS NOT NULL
-  GROUP BY funding_department_id
-ON CONFLICT (department_id)
-  DO UPDATE SET frequency = department.frequency + EXCLUDED.frequency,
-    first                 = LEAST(department.first, EXCLUDED.first),
-    last                  = GREATEST(department.last, EXCLUDED.last);
-
--- psql:temp_inserts.sql:31: ERROR:  null value in column "department_id" violates not-null constraint
--- DETAIL:  Failing row contains (null, 376335, 2004-11-20, 2016-08-12).
--- Time: 359791.484 ms
-
-
-INSERT INTO department_name
-(department_id, department_name, frequency, first, last)
-  SELECT
-    contracting_department_id,
-    contracting_department_name,
-    count(*)                AS frequency,
-    min(last_modified_date) AS first,
-    max(last_modified_date) AS last
-  FROM contract
-  WHERE contracting_department_id IS NOT NULL AND
-        contracting_department_name IS NOT NULL
-  GROUP BY contracting_department_id, contracting_department_name
-ON CONFLICT (department_id, department_name)
-  DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
-    first                 = LEAST(department_name.first, EXCLUDED.first),
-    last                  = GREATEST(department_name.last, EXCLUDED.last);
-
--- psql:temp_inserts.sql:49: ERROR:  missing FROM-clause entry for table "contract_all"
--- LINE 11:         contract_all.contracting_department_name IS NOT NULL
---                  ^
--- Time: 0.695 ms
-
-INSERT INTO department_name
-(department_id, department_name, frequency, first, last)
-  SELECT
-    funding_department_id,
-    funding_department_name,
-    count(*)                AS frequency,
-    min(last_modified_date) AS first,
-    max(last_modified_date) AS last
-  FROM contract
-  WHERE funding_department_id IS NOT NULL AND
-        funding_department_name IS NOT NULL
-  GROUP BY funding_department_id, funding_department_name
-ON CONFLICT (department_id, department_name)
-  DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
-    first                 = LEAST(department_name.first, EXCLUDED.first),
-    last                  = GREATEST(department_name.last, EXCLUDED.last);
-
--- psql:temp_inserts.sql:66: ERROR:  missing FROM-clause entry for table "contract_all"
--- LINE 11:         contract_all.funding_department_name IS NOT NULL
---                  ^
--- Time: 0.369 ms
-
--- INSERT INTO agency
--- (department_id, agency_id, frequency, first, last)
+-- INSERT INTO department
+-- (department_id, frequency, first, last)
 --   SELECT
---     contracting_department_id,
---     contracting_agency_id,
+--     funding_department_id,
 --     count(*)                AS frequency,
 --     min(last_modified_date) AS first,
 --     max(last_modified_date) AS last
 --   FROM contract
---   WHERE contracting_agency_id IS NOT NULL
---   GROUP BY contracting_department_id, contracting_agency_id
--- ON CONFLICT (agency_id)
---   DO UPDATE SET frequency = agency.frequency + EXCLUDED.frequency,
---     first                 = LEAST(agency.first, EXCLUDED.first),
---     last                  = GREATEST(agency.last, EXCLUDED.last);
+--   WHERE funding_department_id IS NOT NULL
+--   GROUP BY funding_department_id
+-- ON CONFLICT (department_id)
+--   DO UPDATE SET frequency = department.frequency + EXCLUDED.frequency,
+--     first                 = LEAST(department.first, EXCLUDED.first),
+--     last                  = GREATEST(department.last, EXCLUDED.last);
+
+-- INSERT 0 79
+-- Time: 361676.274 ms
+
+-- INSERT INTO department_name
+-- (department_id, department_name, frequency, first, last)
+--   SELECT
+--     contracting_department_id,
+--     contracting_department_name,
+--     count(*)                AS frequency,
+--     min(last_modified_date) AS first,
+--     max(last_modified_date) AS last
+--   FROM contract
+--   WHERE contracting_department_id IS NOT NULL AND
+--         contracting_department_name IS NOT NULL
+--   GROUP BY contracting_department_id, contracting_department_name
+-- ON CONFLICT (department_id, department_name)
+--   DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
+--     first                 = LEAST(department_name.first, EXCLUDED.first),
+--     last                  = GREATEST(department_name.last, EXCLUDED.last);
+
+-- INSERT 0 2
+-- Time: 365492.889 ms
+
+-- INSERT INTO department_name
+-- (department_id, department_name, frequency, first, last)
+--   SELECT
+--     funding_department_id,
+--     funding_department_name,
+--     count(*)                AS frequency,
+--     min(last_modified_date) AS first,
+--     max(last_modified_date) AS last
+--   FROM contract
+--   WHERE funding_department_id IS NOT NULL AND
+--         funding_department_name IS NOT NULL
+--   GROUP BY funding_department_id, funding_department_name
+-- ON CONFLICT (department_id, department_name)
+--   DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
+--     first                 = LEAST(department_name.first, EXCLUDED.first),
+--     last                  = GREATEST(department_name.last, EXCLUDED.last);
+
+-- INSERT 0 96
+-- Time: 365679.848 ms
+
+INSERT INTO agency
+(agency_id, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL
+  GROUP BY contracting_agency_id
+ON CONFLICT (agency_id)
+  DO UPDATE SET frequency = agency.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency.first, EXCLUDED.first),
+    last                  = GREATEST(agency.last, EXCLUDED.last);
 
 -- INSERT 0 31
 -- Time: 359351.669 ms
 
 INSERT INTO agency
-(department_id, agency_id, frequency, first, last)
+(agency_id, frequency, first, last)
   SELECT
-    funding_department_id,
     funding_agency_id,
     count(*)                AS frequency,
     min(last_modified_date) AS first,
     max(last_modified_date) AS last
   FROM contract
   WHERE funding_agency_id IS NOT NULL
-  GROUP BY funding_department_id, funding_agency_id
+  GROUP BY funding_agency_id
 ON CONFLICT (agency_id)
   DO UPDATE SET frequency = agency.frequency + EXCLUDED.frequency,
     first                 = LEAST(agency.first, EXCLUDED.first),
     last                  = GREATEST(agency.last, EXCLUDED.last);
 
--- psql:temp_inserts.sql:98: ERROR:  ON CONFLICT DO UPDATE command cannot affect row a second time
+-- psql:temp_inserts.sql:120: ERROR:  21000: ON CONFLICT DO UPDATE command cannot affect row a second time
 -- HINT:  Ensure that no rows proposed for insertion within the same command have duplicate constrained values.
--- Time: 359726.080 ms
+-- LOCATION:  ExecOnConflictUpdate, nodeModifyTable.c:1104
+-- Time: 365644.676 ms
 
--- INSERT INTO agency_name
--- (agency_id, agency_name, frequency, first, last)
---   SELECT
---     contracting_agency_id,
---     contracting_agency_name,
---     count(*)                AS frequency,
---     min(last_modified_date) AS first,
---     max(last_modified_date) AS last
---   FROM contract
---   WHERE contracting_agency_id IS NOT NULL AND
---         contracting_agency_name IS NOT NULL
---   GROUP BY contracting_agency_id, contracting_agency_name
--- ON CONFLICT (agency_id, agency_name)
---   DO UPDATE SET frequency = agency_name.frequency + EXCLUDED.frequency,
---     first                 = LEAST(agency_name.first, EXCLUDED.first),
---     last                  = GREATEST(agency_name.last, EXCLUDED.last);
+INSERT INTO agency_department
+(agency_id, department_id, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    contracting_department_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL AND
+        contracting_department_id IS NOT NULL
+  GROUP BY contracting_agency_id, contracting_department_id
+ON CONFLICT (agency_id, department_id)
+  DO UPDATE SET frequency = agency_department.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency_department.first, EXCLUDED.first),
+    last                  = GREATEST(agency_department.last, EXCLUDED.last);
+
+INSERT INTO agency_department
+(agency_id, department_id, frequency, first, last)
+  SELECT
+    funding_agency_id,
+    funding_department_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE funding_agency_id IS NOT NULL AND
+        funding_department_id IS NOT NULL
+  GROUP BY funding_agency_id, funding_department_id
+ON CONFLICT (agency_id, department_id)
+  DO UPDATE SET frequency = agency_department.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency_department.first, EXCLUDED.first),
+    last                  = GREATEST(agency_department.last, EXCLUDED.last);
+
+
+INSERT INTO agency_name
+(agency_id, agency_name, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    contracting_agency_name,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL AND
+        contracting_agency_name IS NOT NULL
+  GROUP BY contracting_agency_id, contracting_agency_name
+ON CONFLICT (agency_id, agency_name)
+  DO UPDATE SET frequency = agency_name.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency_name.first, EXCLUDED.first),
+    last                  = GREATEST(agency_name.last, EXCLUDED.last);
 
 -- INSERT 0 32
 -- Time: 359352.223 ms
@@ -160,26 +188,30 @@ ON CONFLICT (agency_id, agency_name)
     first                 = LEAST(agency_name.first, EXCLUDED.first),
     last                  = GREATEST(agency_name.last, EXCLUDED.last);
 
--- psql:temp_inserts.sql:133: ERROR:  insert or update on table "agency_name" violates foreign key constraint "fk_agency_name"
+-- psql:temp_inserts.sql:161: ERROR:  23503: insert or update on table "agency_name" violates foreign key constraint "fk_agency_name"
 -- DETAIL:  Key (agency_id)=(1760) is not present in table "agency".
--- Time: 359783.743 ms
+-- SCHEMA NAME:  public
+-- TABLE NAME:  agency_name
+-- CONSTRAINT NAME:  fk_agency_name
+-- LOCATION:  ri_ReportViolation, ri_triggers.c:3326
+-- Time: 365730.059 ms
 
--- INSERT INTO office
--- (agency_id, office_id, frequency, first, last)
---   SELECT
---     contracting_agency_id,
---     contracting_office_id,
---     count(*)                AS frequency,
---     min(last_modified_date) AS first,
---     max(last_modified_date) AS last
---   FROM contract
---   WHERE contracting_agency_id IS NOT NULL AND
---         contracting_office_id IS NOT NULL
---   GROUP BY contracting_agency_id, contracting_office_id
--- ON CONFLICT (agency_id, office_id)
---   DO UPDATE SET frequency = office.frequency + EXCLUDED.frequency,
---     first                 = LEAST(office.first, EXCLUDED.first),
---     last                  = GREATEST(office.last, EXCLUDED.last);
+INSERT INTO office
+(agency_id, office_id, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    contracting_office_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL AND
+        contracting_office_id IS NOT NULL
+  GROUP BY contracting_agency_id, contracting_office_id
+ON CONFLICT (agency_id, office_id)
+  DO UPDATE SET frequency = office.frequency + EXCLUDED.frequency,
+    first                 = LEAST(office.first, EXCLUDED.first),
+    last                  = GREATEST(office.last, EXCLUDED.last);
 
 -- INSERT 0 3437
 -- Time: 438580.570 ms
@@ -201,28 +233,32 @@ ON CONFLICT (agency_id, office_id)
     first                 = LEAST(office.first, EXCLUDED.first),
     last                  = GREATEST(office.last, EXCLUDED.last);
 
--- psql:temp_inserts.sql:169: ERROR:  insert or update on table "office" violates foreign key constraint "fk_office_agency"
+-- psql:temp_inserts.sql:202: ERROR:  23503: insert or update on table "office" violates foreign key constraint "fk_office_agency"
 -- DETAIL:  Key (agency_id)=(0300) is not present in table "agency".
--- Time: 430239.406 ms
+-- SCHEMA NAME:  public
+-- TABLE NAME:  office
+-- CONSTRAINT NAME:  fk_office_agency
+-- LOCATION:  ri_ReportViolation, ri_triggers.c:3326
+-- Time: 437939.599 ms
 
--- INSERT INTO office_name
--- (agency_id, office_id, office_name, frequency, first, last)
---   SELECT
---     contracting_agency_id,
---     contracting_office_id,
---     contracting_office_name,
---     count(*)                AS frequency,
---     min(last_modified_date) AS first,
---     max(last_modified_date) AS last
---   FROM contract
---   WHERE contracting_agency_id IS NOT NULL AND
---         contracting_office_id IS NOT NULL AND
---         contracting_office_name IS NOT NULL
---   GROUP BY contracting_agency_id, contracting_office_id, contracting_office_name
--- ON CONFLICT (agency_id, office_id, office_name)
---   DO UPDATE SET frequency = office_name.frequency + EXCLUDED.frequency,
---     first                 = LEAST(office_name.first, EXCLUDED.first),
---     last                  = GREATEST(office_name.last, EXCLUDED.last);
+INSERT INTO office_name
+(agency_id, office_id, office_name, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    contracting_office_id,
+    contracting_office_name,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL AND
+        contracting_office_id IS NOT NULL AND
+        contracting_office_name IS NOT NULL
+  GROUP BY contracting_agency_id, contracting_office_id, contracting_office_name
+ON CONFLICT (agency_id, office_id, office_name)
+  DO UPDATE SET frequency = office_name.frequency + EXCLUDED.frequency,
+    first                 = LEAST(office_name.first, EXCLUDED.first),
+    last                  = GREATEST(office_name.last, EXCLUDED.last);
 
 -- INSERT 0 3503
 -- Time: 458186.150 ms
@@ -246,9 +282,13 @@ ON CONFLICT (agency_id, office_id, office_name)
     first                 = LEAST(office_name.first, EXCLUDED.first),
     last                  = GREATEST(office_name.last, EXCLUDED.last);
 
--- psql:temp_inserts.sql:208: ERROR:  insert or update on table "office_name" violates foreign key constraint "fk_office_name"
+-- psql:temp_inserts.sql:247: ERROR:  23503: insert or update on table "office_name" violates foreign key constraint "fk_office_name"
 -- DETAIL:  Key (agency_id, office_id)=(0300, 0300) is not present in table "office".
--- Time: 452024.405 ms
+-- SCHEMA NAME:  public
+-- TABLE NAME:  office_name
+-- CONSTRAINT NAME:  fk_office_name
+-- LOCATION:  ri_ReportViolation, ri_triggers.c:3326
+-- Time: 456907.778 ms
 
 -- INSERT INTO contractor
 -- (duns_number, frequency, first, last)
@@ -558,23 +598,22 @@ ON CONFLICT (agency_id, office_id, office_name)
 -- -- INSERT 0 527524
 -- -- Time: 452131.640 ms
 
-INSERT INTO contractor_annual_revenue
-(duns_number, annual_revenue, frequency, first, last)
-  SELECT
-    contractor_duns_number,
-    contractor_annual_revenue,
-    count(*)                AS frequency,
-    min(last_modified_date) AS first,
-    max(last_modified_date) AS last
-  FROM contract
-  WHERE contractor_duns_number IS NOT NULL AND
-        contractor_annual_revenue IS NOT NULL
-  GROUP BY contractor_duns_number,
-    contractor_annual_revenue;
-
--- psql:temp_inserts.sql:487: ERROR:  duplicate key value violates unique constraint "pk_contractor_annual_revenue"
--- DETAIL:  Key (duns_number, annual_revenue)=(000000000, $0.00) already exists.
--- Time: 414845.385 ms
+-- INSERT INTO contractor_annual_revenue
+-- (duns_number, annual_revenue, frequency, first, last)
+--   SELECT
+--     contractor_duns_number,
+--     contractor_annual_revenue,
+--     count(*)                AS frequency,
+--     min(last_modified_date) AS first,
+--     max(last_modified_date) AS last
+--   FROM contract
+--   WHERE contractor_duns_number IS NOT NULL AND
+--         contractor_annual_revenue IS NOT NULL
+--   GROUP BY contractor_duns_number,
+--     contractor_annual_revenue;
+--
+-- -- INSERT 0 572719
+-- -- Time: 458160.876 ms
 
 -- INSERT INTO contractor_business_size
 -- (duns_number, business_size, frequency, first, last)
@@ -656,68 +695,64 @@ INSERT INTO contractor_annual_revenue
 --
 -- -- [2016-09-14 10:34:53] completed in 22ms
 
-update contract
-set contractor_other_location_info = contractor_other_location_info(contractor_state),
-  contractor_state = contractor_state(contractor_state)
-where contractor_state is NOT NULL;
+-- update contract
+-- set contractor_other_location_info = contractor_other_location_info(contractor_state),
+--   contractor_state = contractor_state(contractor_state)
+-- where contractor_state is NOT NULL;
 
--- psql:temp_inserts.sql:558: ERROR:  argument of AND must be type boolean, not type text
--- LINE 2: set contractor_other_location_info = contractor_other_locati...
---                                              ^
--- Time: 0.918 ms
+-- UPDATE 21540627
+-- Time: 17257989.668 ms
 
-DROP FUNCTION contractor_other_location_info();
+-- DROP FUNCTION contractor_other_location_info(TEXT);
+--
+-- -- [2016-09-14 18:28:04] completed in 17ms
+--
+-- DROP FUNCTION contractor_state(TEXT);
+--
+-- -- [2016-09-14 18:27:59] completed in 42ms
 
--- psql:temp_inserts.sql:560: ERROR:  function contractor_other_location_info() does not exist
--- Time: 0.388 ms
+-- ALTER TABLE contract ADD FOREIGN KEY(contractor_state) REFERENCES state(code);
 
-DROP FUNCTION contractor_state();
-
--- psql:temp_inserts.sql:561: ERROR:  function contractor_state() does not exist
--- Time: 0.293 ms
-
-ALTER TABLE contract ADD FOREIGN KEY(contractor_state) REFERENCES state(code);
-
--- psql:temp_inserts.sql:563: ERROR:  insert or update on table "contract" violates foreign key constraint "contract_contractor_state_fkey"
--- DETAIL:  Key (contractor_state)=(ON) is not present in table "state".
--- Time: 23.017 ms
+-- ALTER TABLE
+-- Time: 2058663.885 ms
 
 --
 -- END OF TEMPORARY CODE
 --
 
-INSERT INTO contractor_address
-(duns_number, street_address_1, street_address_2, street_address_3, city, state, other_location_info,
- zip_code, country_code, congressional_district, frequency, first, last)
-  SELECT
-    contractor_duns_number,
-    COALESCE(contractor_street_address_1, ''),
-    COALESCE(contractor_street_address_2, ''),
-    COALESCE(contractor_street_address_3, ''),
-    COALESCE(contractor_city, ''),
-    contractor_state,
-    COALESCE(contractor_other_location_info, ''),
-    COALESCE(contractor_zip_code, ''),
-    contractor_country,
-    COALESCE(contractor_congressional_district, ''),
-    count(*)                AS frequency,
-    min(last_modified_date) AS first,
-    max(last_modified_date) AS last
-  FROM contract
-  WHERE contractor_duns_number IS NOT NULL
-  GROUP BY contractor_duns_number,
-    contractor_street_address_1,
-    contractor_street_address_2,
-    contractor_street_address_3,
-    contractor_city,
-    contractor_state,
-    contractor_other_location_info,
-    contractor_zip_code,
-    contractor_country,
-    contractor_congressional_district;
+-- INSERT INTO contractor_address
+-- (duns_number, street_address_1, street_address_2, street_address_3, city, state, other_location_info,
+--  zip_code, country_code, congressional_district, frequency, first, last)
+--   SELECT
+--     contractor_duns_number,
+--     COALESCE(contractor_street_address_1, ''),
+--     COALESCE(contractor_street_address_2, ''),
+--     COALESCE(contractor_street_address_3, ''),
+--     COALESCE(contractor_city, ''),
+--     contractor_state,
+--     COALESCE(contractor_other_location_info, ''),
+--     COALESCE(contractor_zip_code, ''),
+--     contractor_country,
+--     COALESCE(contractor_congressional_district, ''),
+--     count(*)                AS frequency,
+--     min(last_modified_date) AS first,
+--     max(last_modified_date) AS last
+--   FROM contract
+--   WHERE contractor_duns_number IS NOT NULL
+--   GROUP BY contractor_duns_number,
+--     contractor_street_address_1,
+--     contractor_street_address_2,
+--     contractor_street_address_3,
+--     contractor_city,
+--     contractor_state,
+--     contractor_other_location_info,
+--     contractor_zip_code,
+--     contractor_country,
+--     contractor_congressional_district;
 
--- psql:temp_inserts.sql:597: ERROR:  column "contractor_other_location_info" does not exist
--- LINE 11:     COALESCE(contractor_other_location_info, ''),
+-- INSERT 0 606979
+-- Time: 1060627.360 ms
+
 --                       ^
 -- Time: 7.157 ms
 

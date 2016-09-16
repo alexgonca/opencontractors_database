@@ -866,7 +866,7 @@ CREATE OR REPLACE FUNCTION contractor_other_location_info(field TEXT) RETURNS TE
 BEGIN
   IF field in ('AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MH', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'PW', 'RI', 'SC', 'SD', 'TN', 'TX', 'UM', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY', 'PALAU', 'PUERTO RICO') THEN
     return NULL;
-  ELSE
+  ELSEr
     RETURN field;
   END IF;
 END;
@@ -3554,3 +3554,39 @@ SELECT import_contract_csv('/home/alex/PycharmProjects/opencontractorsdatabasev2
 SELECT import_contract_csv('/home/alex/PycharmProjects/opencontractorsdatabasev2/datafeeds/datafeeds/2014_minor.csv');
 SELECT import_contract_csv('/home/alex/PycharmProjects/opencontractorsdatabasev2/datafeeds/datafeeds/2015_minor.csv');
 SELECT import_contract_csv('/home/alex/PycharmProjects/opencontractorsdatabasev2/datafeeds/datafeeds/2016_minor.csv');
+
+
+update contract
+set claimant_program =
+(CASE claimant_program
+ WHEN 'A30' THEN 'A3'
+ WHEN 'A70' THEN 'A7'
+ WHEN 'B90' THEN 'B9'
+ WHEN 'C20' THEN 'C2'
+WHEN 'S10' THEN 'S1'
+ END)
+where claimant_program in ('A30', 'A70', 'B90', 'C20', 'S10');
+
+delete from claimant_program
+WHERE code in ('A30', 'A70', 'B90', 'C20', 'S10');
+
+create index idx_contractor_state on contract(contractor_state);
+create index idx_place_of_performance_state on contract(place_of_performance_state);
+create index idx_place_of_performance_state_redundant on contract(place_of_performance_state_redundant);
+
+update contract
+  set contractor_state = contractor_other_location_info
+where contractor_other_location_info in ('AA', 'AE', 'AP', 'FM');
+
+update contract
+  set contractor_other_location_info = NULL
+where contractor_other_location_info in ('AA', 'AE', 'AP', 'FM');
+
+update contract
+set place_of_performance_state = 'XX'
+where place_of_performance_state in ('BC', 'GB', 'GM', 'JA', 'QC', 'UK', 'US');
+
+delete from state
+where status is null;
+
+alter table state drop column american_state;

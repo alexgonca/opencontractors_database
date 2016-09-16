@@ -1,6 +1,8 @@
 \timing
+\set ECHO all
+\set VERBOSITY verbose
 
-DROP TABLE IF EXISTS department;
+DROP TABLE IF EXISTS department CASCADE;
 
 CREATE TABLE IF NOT EXISTS department (
   department_id VARCHAR(4) CONSTRAINT pk_department PRIMARY KEY,
@@ -23,14 +25,26 @@ CREATE TABLE IF NOT EXISTS department_name
   CONSTRAINT fk_department_name FOREIGN KEY (department_id) REFERENCES department (department_id)
 );
 
-DROP TABLE IF EXISTS agency;
+DROP TABLE IF EXISTS agency CASCADE;
 
 CREATE TABLE IF NOT EXISTS agency (
   agency_id     VARCHAR(4) CONSTRAINT pk_agency PRIMARY KEY,
   frequency     INT,
   first         DATE,
-  last          DATE,
-  department_id VARCHAR(4) CONSTRAINT fk_agency_department REFERENCES department (department_id)
+  last          DATE
+);
+
+DROP TABLE IF EXISTS agency_department;
+
+CREATE TABLE IF NOT EXISTS agency_department (
+  id          SERIAL CONSTRAINT pk_agency_department PRIMARY KEY,
+  agency_id   VARCHAR(4),
+  department_id VARCHAR(4) CONSTRAINT fk_agency_department REFERENCES department (department_id),
+  frequency   INT,
+  first       DATE,
+  last        DATE,
+  CONSTRAINT u_agency_department UNIQUE (agency_id, department_id),
+  CONSTRAINT fk_agency_deparment_agency FOREIGN KEY (agency_id) REFERENCES agency (agency_id)
 );
 
 DROP TABLE IF EXISTS agency_name;
@@ -46,7 +60,7 @@ CREATE TABLE IF NOT EXISTS agency_name (
   CONSTRAINT fk_agency_name FOREIGN KEY (agency_id) REFERENCES agency (agency_id)
 );
 
-DROP TABLE IF EXISTS office;
+DROP TABLE IF EXISTS office CASCADE;
 
 CREATE TABLE IF NOT EXISTS office (
   id        SERIAL CONSTRAINT pk_office PRIMARY KEY,
@@ -72,7 +86,7 @@ CREATE TABLE IF NOT EXISTS office_name (
   CONSTRAINT fk_office_name FOREIGN KEY (agency_id, office_id) REFERENCES office (agency_id, office_id)
 );
 
-DROP TABLE IF EXISTS contractor;
+DROP TABLE IF EXISTS contractor cascade;
 
 CREATE TABLE IF NOT EXISTS contractor (
   duns_number VARCHAR(9) CONSTRAINT pk_contractor PRIMARY KEY,
@@ -81,7 +95,7 @@ CREATE TABLE IF NOT EXISTS contractor (
   last        DATE
 );
 
-DROP TYPE IF EXISTS name_type;
+DROP TYPE IF EXISTS name_type CASCADE;
 
 CREATE TYPE name_type AS ENUM
 ('name',
@@ -243,8 +257,6 @@ CREATE TABLE IF NOT EXISTS contractor_organizational_type (
 DROP TABLE IF EXISTS contractor_number_of_employees;
 
 
-
-
 CREATE TABLE IF NOT EXISTS contractor_number_of_employees (
   id SERIAL CONSTRAINT pk_contractor_number_of_employees PRIMARY KEY,
   duns_number         VARCHAR(9),
@@ -255,6 +267,24 @@ CREATE TABLE IF NOT EXISTS contractor_number_of_employees (
   CONSTRAINT u_contractor_number_of_employees UNIQUE (duns_number, number_of_employees),
   CONSTRAINT fk_contractor_number_of_employees FOREIGN KEY (duns_number) REFERENCES contractor (duns_number)
 );
+
+DROP TABLE IF EXISTS contractor_annual_revenue;
+
+
+CREATE TABLE IF NOT EXISTS contractor_annual_revenue (
+  id SERIAL CONSTRAINT pk_contractor_annual_revenue PRIMARY KEY,
+  duns_number         VARCHAR(9),
+  annual_revenue MONEY,
+  frequency           INTEGER,
+  first               DATE,
+  last                DATE,
+  CONSTRAINT u_contractor_annual_revenue UNIQUE (duns_number, annual_revenue),
+  CONSTRAINT fk_contractor_annual_revenue FOREIGN KEY (duns_number) REFERENCES contractor (duns_number)
+);
+
+DROP TABLE IF EXISTS contractor_number_of_employees;
+
+
 
 DROP TABLE IF EXISTS contractor_business_size;
 
@@ -404,38 +434,6 @@ BEGIN
 END
 $func$ LANGUAGE plpgsql;
 
--- TEMPORARY CODE
-
-CREATE OR REPLACE FUNCTION contractor_other_location_info(field TEXT) RETURNS TEXT AS $$
-BEGIN
-  IF field in ('AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MH', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'PW', 'RI', 'SC', 'SD', 'TN', 'TX', 'UM', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY', 'PALAU', 'PUERTO RICO') THEN
-    return NULL;
-  ELSE
-    RETURN field;
-  END IF;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION contractor_state(field TEXT) RETURNS TEXT AS $$
-BEGIN
-  IF field in ('AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MH', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'PW', 'RI', 'SC', 'SD', 'TN', 'TX', 'UM', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY') THEN
-    return field;
-  ELSEIF field = 'PALAU' THEN
-    return 'PW';
-  ELSEIF field = 'PUERTO RICO' THEN
-    return 'PR';
-  ELSE
-    RETURN NULL;
-  END IF;
-END;
-$$ LANGUAGE plpgsql;
-
--- END OF TEMPORARY CODE
-
---
--- ALL THE INSERTS
---
-
 INSERT INTO department
 (department_id, frequency, first, last)
   SELECT
@@ -451,6 +449,9 @@ ON CONFLICT (department_id)
     first                 = LEAST(department.first, EXCLUDED.first),
     last                  = GREATEST(department.last, EXCLUDED.last);
 
+-- INSERT 0 1
+-- Time: 355458.435 ms
+
 INSERT INTO department
 (department_id, frequency, first, last)
   SELECT
@@ -459,13 +460,15 @@ INSERT INTO department
     min(last_modified_date) AS first,
     max(last_modified_date) AS last
   FROM contract
-  WHERE contracting_department_id IS NOT NULL
+  WHERE funding_department_id IS NOT NULL
   GROUP BY funding_department_id
 ON CONFLICT (department_id)
   DO UPDATE SET frequency = department.frequency + EXCLUDED.frequency,
     first                 = LEAST(department.first, EXCLUDED.first),
     last                  = GREATEST(department.last, EXCLUDED.last);
 
+-- INSERT 0 79
+-- Time: 361676.274 ms
 
 INSERT INTO department_name
 (department_id, department_name, frequency, first, last)
@@ -477,12 +480,15 @@ INSERT INTO department_name
     max(last_modified_date) AS last
   FROM contract
   WHERE contracting_department_id IS NOT NULL AND
-        contract_all.contracting_department_name IS NOT NULL
+        contracting_department_name IS NOT NULL
   GROUP BY contracting_department_id, contracting_department_name
 ON CONFLICT (department_id, department_name)
   DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
     first                 = LEAST(department_name.first, EXCLUDED.first),
     last                  = GREATEST(department_name.last, EXCLUDED.last);
+
+-- INSERT 0 2
+-- Time: 365492.889 ms
 
 INSERT INTO department_name
 (department_id, department_name, frequency, first, last)
@@ -494,44 +500,84 @@ INSERT INTO department_name
     max(last_modified_date) AS last
   FROM contract
   WHERE funding_department_id IS NOT NULL AND
-        contract_all.funding_department_name IS NOT NULL
+        funding_department_name IS NOT NULL
   GROUP BY funding_department_id, funding_department_name
 ON CONFLICT (department_id, department_name)
   DO UPDATE SET frequency = department_name.frequency + EXCLUDED.frequency,
     first                 = LEAST(department_name.first, EXCLUDED.first),
     last                  = GREATEST(department_name.last, EXCLUDED.last);
 
+-- INSERT 0 96
+-- Time: 365679.848 ms
+
 INSERT INTO agency
-(department_id, agency_id, frequency, first, last)
+(agency_id, frequency, first, last)
   SELECT
-    contracting_department_id,
     contracting_agency_id,
     count(*)                AS frequency,
     min(last_modified_date) AS first,
     max(last_modified_date) AS last
   FROM contract
   WHERE contracting_agency_id IS NOT NULL
-  GROUP BY contracting_department_id, contracting_agency_id
+  GROUP BY contracting_agency_id
 ON CONFLICT (agency_id)
   DO UPDATE SET frequency = agency.frequency + EXCLUDED.frequency,
     first                 = LEAST(agency.first, EXCLUDED.first),
     last                  = GREATEST(agency.last, EXCLUDED.last);
 
+-- INSERT 0 31
+-- Time: 359351.669 ms
+
 INSERT INTO agency
-(department_id, agency_id, frequency, first, last)
+(agency_id, frequency, first, last)
   SELECT
-    funding_department_id,
     funding_agency_id,
     count(*)                AS frequency,
     min(last_modified_date) AS first,
     max(last_modified_date) AS last
   FROM contract
   WHERE funding_agency_id IS NOT NULL
-  GROUP BY funding_department_id, funding_agency_id
+  GROUP BY funding_agency_id
 ON CONFLICT (agency_id)
   DO UPDATE SET frequency = agency.frequency + EXCLUDED.frequency,
     first                 = LEAST(agency.first, EXCLUDED.first),
     last                  = GREATEST(agency.last, EXCLUDED.last);
+
+-- Time: 365644.676 ms
+
+INSERT INTO agency_department
+(agency_id, department_id, frequency, first, last)
+  SELECT
+    contracting_agency_id,
+    contracting_department_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE contracting_agency_id IS NOT NULL AND
+        contracting_department_id IS NOT NULL
+  GROUP BY contracting_agency_id, contracting_department_id
+ON CONFLICT (agency_id, department_id)
+  DO UPDATE SET frequency = agency_department.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency_department.first, EXCLUDED.first),
+    last                  = GREATEST(agency_department.last, EXCLUDED.last);
+
+INSERT INTO agency_department
+(agency_id, department_id, frequency, first, last)
+  SELECT
+    funding_agency_id,
+    funding_department_id,
+    count(*)                AS frequency,
+    min(last_modified_date) AS first,
+    max(last_modified_date) AS last
+  FROM contract
+  WHERE funding_agency_id IS NOT NULL AND
+        funding_department_id IS NOT NULL
+  GROUP BY funding_agency_id, funding_department_id
+ON CONFLICT (agency_id, department_id)
+  DO UPDATE SET frequency = agency_department.frequency + EXCLUDED.frequency,
+    first                 = LEAST(agency_department.first, EXCLUDED.first),
+    last                  = GREATEST(agency_department.last, EXCLUDED.last);
 
 
 INSERT INTO agency_name
@@ -551,6 +597,9 @@ ON CONFLICT (agency_id, agency_name)
     first                 = LEAST(agency_name.first, EXCLUDED.first),
     last                  = GREATEST(agency_name.last, EXCLUDED.last);
 
+-- INSERT 0 32
+-- Time: 359352.223 ms
+
 INSERT INTO agency_name
 (agency_id, agency_name, frequency, first, last)
   SELECT
@@ -568,7 +617,7 @@ ON CONFLICT (agency_id, agency_name)
     first                 = LEAST(agency_name.first, EXCLUDED.first),
     last                  = GREATEST(agency_name.last, EXCLUDED.last);
 
-
+-- Time: 365730.059 ms
 
 INSERT INTO office
 (agency_id, office_id, frequency, first, last)
@@ -587,6 +636,9 @@ ON CONFLICT (agency_id, office_id)
     first                 = LEAST(office.first, EXCLUDED.first),
     last                  = GREATEST(office.last, EXCLUDED.last);
 
+-- INSERT 0 3437
+-- Time: 438580.570 ms
+
 INSERT INTO office
 (agency_id, office_id, frequency, first, last)
   SELECT
@@ -604,6 +656,7 @@ ON CONFLICT (agency_id, office_id)
     first                 = LEAST(office.first, EXCLUDED.first),
     last                  = GREATEST(office.last, EXCLUDED.last);
 
+-- Time: 437939.599 ms
 
 INSERT INTO office_name
 (agency_id, office_id, office_name, frequency, first, last)
@@ -624,6 +677,9 @@ ON CONFLICT (agency_id, office_id, office_name)
     first                 = LEAST(office_name.first, EXCLUDED.first),
     last                  = GREATEST(office_name.last, EXCLUDED.last);
 
+-- INSERT 0 3503
+-- Time: 458186.150 ms
+
 INSERT INTO office_name
 (agency_id, office_id, office_name, frequency, first, last)
   SELECT
@@ -643,6 +699,8 @@ ON CONFLICT (agency_id, office_id, office_name)
     first                 = LEAST(office_name.first, EXCLUDED.first),
     last                  = GREATEST(office_name.last, EXCLUDED.last);
 
+-- Time: 456907.778 ms
+
 INSERT INTO contractor
 (duns_number, frequency, first, last)
   SELECT
@@ -657,6 +715,9 @@ ON CONFLICT (duns_number)
   DO UPDATE SET frequency = contractor.frequency + EXCLUDED.frequency,
     first                 = LEAST(contractor.first, EXCLUDED.first),
     last                  = GREATEST(contractor.last, EXCLUDED.last);
+
+-- INSERT 0 298531
+-- Time: 360402.751 ms
 
 INSERT INTO contractor
 (duns_number, frequency, first, last)
@@ -673,6 +734,9 @@ ON CONFLICT (duns_number)
     first                 = LEAST(contractor.first, EXCLUDED.first),
     last                  = GREATEST(contractor.last, EXCLUDED.last);
 
+-- INSERT 0 276811
+-- Time: 362032.534 ms
+
 INSERT INTO contractor_name
 (duns_number, name, type, frequency, first, last)
   SELECT
@@ -686,6 +750,9 @@ INSERT INTO contractor_name
   WHERE contractor_duns_number IS NOT NULL AND
         contractor_name IS NOT NULL
   GROUP BY contractor_duns_number, contractor_name;
+
+-- -- INSERT 0 470870
+-- -- Time: 537770.017 ms
 
 INSERT INTO contractor_name
 (duns_number, name, type, frequency, first, last)
@@ -705,6 +772,9 @@ ON CONFLICT (duns_number, name, type)
     first                 = LEAST(contractor_name.first, EXCLUDED.first),
     last                  = GREATEST(contractor_name.last, EXCLUDED.last);
 
+-- -- INSERT 0 314169
+-- -- Time: 498426.522 ms
+
 INSERT INTO contractor_name
 (duns_number, name, type, frequency, first, last)
   SELECT
@@ -718,6 +788,9 @@ INSERT INTO contractor_name
   WHERE contractor_duns_number IS NOT NULL AND
         contractor_alternate_name IS NOT NULL
   GROUP BY contractor_duns_number, contractor_alternate_name;
+
+-- -- INSERT 0 79787
+-- -- Time: 373088.921 ms
 
 INSERT INTO contractor_name
 (duns_number, name, type, frequency, first, last)
@@ -733,6 +806,9 @@ INSERT INTO contractor_name
         contractor_legal_organization_name IS NOT NULL
   GROUP BY contractor_duns_number, contractor_legal_organization_name;
 
+-- -- INSERT 0 111822
+-- -- Time: 383673.794 ms
+
 INSERT INTO contractor_name
 (duns_number, name, type, frequency, first, last)
   SELECT
@@ -747,6 +823,9 @@ INSERT INTO contractor_name
         contractor_doing_as_business_name IS NOT NULL
   GROUP BY contractor_duns_number, contractor_doing_as_business_name;
 
+-- -- INSERT 0 17451
+-- -- Time: 357430.214 ms
+
 INSERT INTO contractor_division_name
 (duns_number, division_name, frequency, first, last)
   SELECT
@@ -760,6 +839,8 @@ INSERT INTO contractor_division_name
         contractor_division_name IS NOT NULL
   GROUP BY contractor_duns_number, contractor_division_name;
 
+-- -- INSERT 0 1
+-- -- Time: 358027.842 ms
 
 INSERT INTO contractor_division_number_or_office_code
 (duns_number, division_number_or_office_code, frequency, first, last)
@@ -774,7 +855,8 @@ INSERT INTO contractor_division_number_or_office_code
         contractor_division_number_or_office_code IS NOT NULL
   GROUP BY contractor_duns_number, contractor_division_number_or_office_code;
 
-
+-- -- INSERT 0 0
+-- -- Time: 359582.849 ms
 
 INSERT INTO contractor_enabled
 (duns_number, enabled, frequency, first, last)
@@ -789,7 +871,8 @@ INSERT INTO contractor_enabled
         contractor_enabled IS NOT NULL
   GROUP BY contractor_duns_number, contractor_enabled;
 
-
+-- -- INSERT 0 0
+-- -- Time: 359573.543 ms
 
 INSERT INTO contractor_location_disable_flag
 (duns_number, location_disable_flag, frequency, first, last)
@@ -803,6 +886,9 @@ INSERT INTO contractor_location_disable_flag
   WHERE contractor_duns_number IS NOT NULL AND
         contractor_location_disable_flag IS NOT NULL
   GROUP BY contractor_duns_number, contractor_location_disable_flag;
+
+-- -- INSERT 0 0
+-- -- Time: 359338.501 ms
 
 INSERT INTO contractor_parent
 (duns_number, parent_duns_number, frequency, first, last)
@@ -818,6 +904,8 @@ INSERT INTO contractor_parent
   GROUP BY contractor_duns_number,
     contractor_parent_duns_number;
 
+-- -- INSERT 0 304716
+-- -- Time: 463645.712 ms
 
 INSERT INTO contractor_registration_date
 (duns_number, registration_date, frequency, first, last)
@@ -833,6 +921,8 @@ INSERT INTO contractor_registration_date
   GROUP BY contractor_duns_number,
     contractor_registration_date;
 
+-- -- INSERT 0 208237
+-- -- Time: 415106.614 ms
 
 INSERT INTO contractor_renewal_date
 (duns_number, renewal_date, frequency, first, last)
@@ -848,6 +938,8 @@ INSERT INTO contractor_renewal_date
   GROUP BY contractor_duns_number,
     contractor_renewal_date;
 
+-- -- INSERT 0 656153
+-- -- Time: 420251.865 ms
 
 INSERT INTO contractor_phone_number
 (duns_number, phone_number, frequency, first, last)
@@ -863,6 +955,8 @@ INSERT INTO contractor_phone_number
   GROUP BY contractor_duns_number,
     contractor_phone_number;
 
+-- -- INSERT 0 180435
+-- -- Time: 399915.470 ms
 
 INSERT INTO contractor_fax_number
 (duns_number, fax_number, frequency, first, last)
@@ -878,6 +972,9 @@ INSERT INTO contractor_fax_number
   GROUP BY contractor_duns_number,
     contractor_fax_number;
 
+-- -- INSERT 0 170252
+-- -- Time: 398165.042 ms
+
 INSERT INTO contractor_organizational_type
 (duns_number, organizational_type, frequency, first, last)
   SELECT
@@ -892,6 +989,8 @@ INSERT INTO contractor_organizational_type
   GROUP BY contractor_duns_number,
     contractor_organizational_type;
 
+-- -- INSERT 0 200630
+-- -- Time: 406132.610 ms
 
 INSERT INTO contractor_number_of_employees
 (duns_number, number_of_employees, frequency, first, last)
@@ -907,6 +1006,8 @@ INSERT INTO contractor_number_of_employees
   GROUP BY contractor_duns_number,
     contractor_number_of_employees;
 
+-- -- INSERT 0 527524
+-- -- Time: 452131.640 ms
 
 INSERT INTO contractor_annual_revenue
 (duns_number, annual_revenue, frequency, first, last)
@@ -922,6 +1023,9 @@ INSERT INTO contractor_annual_revenue
   GROUP BY contractor_duns_number,
     contractor_annual_revenue;
 
+-- INSERT 0 572719
+-- Time: 458160.876 ms
+
 INSERT INTO contractor_business_size
 (duns_number, business_size, frequency, first, last)
   SELECT
@@ -936,6 +1040,8 @@ INSERT INTO contractor_business_size
   GROUP BY contractor_duns_number,
     contractingofficerbusinesssizedetermination;
 
+-- -- INSERT 0 353293
+-- -- Time: 371122.431 ms
 
 INSERT INTO contractor_ccr_exception
 (duns_number, ccr_exception, frequency, first, last)
@@ -951,6 +1057,9 @@ INSERT INTO contractor_ccr_exception
   GROUP BY contractor_duns_number,
     contractor_ccr_exception;
 
+-- -- INSERT 0 6479
+-- -- Time: 355840.126 ms
+
 INSERT INTO contractor_site_code
 (duns_number, site_code, frequency, first, last)
   SELECT
@@ -965,6 +1074,8 @@ INSERT INTO contractor_site_code
   GROUP BY contractor_duns_number,
     contractor_site_code;
 
+-- -- INSERT 0 268625
+-- -- Time: 428909.679 ms
 
 INSERT INTO contractor_alternate_site_code
 (duns_number, alternate_site_code, frequency, first, last)
@@ -980,27 +1091,8 @@ INSERT INTO contractor_alternate_site_code
   GROUP BY contractor_duns_number,
     contractor_alternate_site_code;
 
---
--- TEMPORARY CODE
---
-
-ALTER TABLE contract
-  ADD COLUMN contractor_other_location_info TEXT,
-  RENAME contractor_state_redundant TO contractor_state_other_info_redundant;
-
-update contract
-set contractor_other_location_info = contractor_other_location_info(contractor_state) AND
-  contractor_state = contractor_state(contractor_state)
-where contractor_state is NOT NULL;
-
-DROP FUNCTION contractor_other_location_info();
-DROP FUNCTION contractor_state();
-
-ALTER TABLE contract ADD FOREIGN KEY(contractor_state) REFERENCES state(code);
-
---
--- END OF TEMPORARY CODE
---
+-- -- INSERT 0 274504
+-- -- Time: 424768.653 ms
 
 INSERT INTO contractor_address
 (duns_number, street_address_1, street_address_2, street_address_3, city, state, other_location_info,
@@ -1032,4 +1124,15 @@ INSERT INTO contractor_address
     contractor_country,
     contractor_congressional_district;
 
+-- INSERT 0 606979
+-- Time: 1060627.360 ms
+
 select insert_flag();
+
+--  insert_flag
+-- -------------
+--
+-- (1 row)
+--
+-- Time: 34006192.330 ms
+

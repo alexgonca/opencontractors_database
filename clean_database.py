@@ -46,7 +46,7 @@ def right_text_and_upper(text):
     return text
 
 
-def validate_state(text):
+def validate_state_adapt(text):
     text = nullify_text(text)
     if text is not None:
         left_text = left_text_and_upper(text)

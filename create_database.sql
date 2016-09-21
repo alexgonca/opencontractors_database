@@ -4930,12 +4930,7 @@ VALUES
 ('C9D', 'Materials Handling Equipment'),
 ('C9E', 'All Others Not Identifiable to Any Other Procurement Program'),
 ('S1', 'Services'),
-('A30', 'Invalid code. Error in usaspending.gov'),
-('A70', 'Invalid code. Error in usaspending.gov'),
-('B90', 'Invalid code. Error in usaspending.gov'),
-('C20', 'Invalid code. Error in usaspending.gov'),
-('C9', 'Invalid code. Error in usaspending.gov'),
-('S10', 'Invalid code. Error in usaspending.gov')
+('C9', 'Invalid code. Error in usaspending.gov')
 ON CONFLICT (code)
 DO NOTHING;
 

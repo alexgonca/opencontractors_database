@@ -866,7 +866,7 @@ CREATE OR REPLACE FUNCTION contractor_other_location_info(field TEXT) RETURNS TE
 BEGIN
   IF field in ('AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MH', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'PW', 'RI', 'SC', 'SD', 'TN', 'TX', 'UM', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI', 'WV', 'WY', 'PALAU', 'PUERTO RICO') THEN
     return NULL;
-  ELSEr
+  ELSE
     RETURN field;
   END IF;
 END;

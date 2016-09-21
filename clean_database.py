@@ -46,13 +46,15 @@ def right_text_and_upper(text):
     return text
 
 
-def validate_state_adapt(text):
+def validate_state(text):
     text = nullify_text(text)
     if text is not None:
         left_text = left_text_and_upper(text)
         if left_text is None:
             left_text = ''
         if len(left_text) == 2:
+            if left_text not in constants.STATE_CODES:
+                left_text = 'XX'
             text = left_text
         else:
             right_text = right_text_and_upper(text)
@@ -83,12 +85,39 @@ def validate_country(text):
 # Specific functions:
 #
 
+def contractor_state(text):
+    text = nullify_text(text)
+    if text in constants.STATE_CODES:
+        return text
+    else:
+        return constants.STATES.get(text, None)
+
+def contractor_other_location_info(text):
+    text = nullify_text(text)
+    if text in constants.STATE_CODES:
+        return None
+    else:
+        aux = constants.STATES.get(text, None)
+        if aux is not None:
+            return None
+        else:
+            return text
+
 def funded_by_foreign_entity(text):
     text = nullify_text(text)
     if text == 'Not Applicable':
         text = 'X'
     return text
 
+def claimant_program(text):
+    text = left_text_and_upper(text)
+    return {
+        'A30': 'A3',
+        'A70': 'A7',
+        'B90': 'B9',
+        'C20': 'C2',
+        'S10': 'S1'
+    }.get(text, text)
 
 def contract_action_type(text):
     text = nullify_text(text)

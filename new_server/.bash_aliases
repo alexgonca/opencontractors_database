@@ -1,1 +1,0 @@
-alias db='psql -h opencontractors.cnc1kbmmfxfb.us-west-1.rds.amazonaws.com -d opencontractors -U opencontractors'

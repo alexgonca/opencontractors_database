@@ -832,6 +832,11 @@ def nullify_text(text):
             text = None
     return text
 
+def upper_case(text):
+    if text is not None:
+        return text.upper()
+    else:
+        return None
 
 def validate_date(text):
     text = nullify_text(text)
@@ -1115,8 +1120,8 @@ def transform_row(record):
     new_record['contractor_state_other_info_redundant'] = nullify_text(record['vendor_state_code'])
     new_record['contractor_zip_code'] = nullify_text(record['zipcode'])
     new_record['contractor_country'] = validate_country(record['vendorcountrycode'])
-    new_record['contractor_congressional_district'] = nullify_text(record['congressionaldistrict'])
-    new_record['contractor_congressional_district_redundant'] = nullify_text(record['vendor_cd'])
+    new_record['contractor_congressional_district'] = upper_case(nullify_text(record['congressionaldistrict']))
+    new_record['contractor_congressional_district_redundant'] = upper_case(nullify_text(record['vendor_cd']))
     new_record['contractor_site_code'] = nullify_text(record['vendorsitecode'])
     new_record['contractor_alternate_site_code'] = nullify_text(record['vendoralternatesitecode'])
     new_record['contractor_duns_number'] = nullify_text(record['dunsnumber'])
@@ -1132,9 +1137,9 @@ def transform_row(record):
     new_record['place_of_performance_state_redundant'] = validate_state(record['statecode'])
     new_record['place_of_performance_country'] = validate_country(record['placeofperformancecountrycode'])
     new_record['place_of_performance_zip_code'] = nullify_text(record['placeofperformancezipcode'])
-    new_record['place_of_performance_congressional_district'] = nullify_text(
-        record['placeofperformancecongressionaldistrict'])
-    new_record['place_of_performance_congressional_district_redundant'] = nullify_text(record['pop_cd'])
+    new_record['place_of_performance_congressional_district'] = upper_case(nullify_text(
+        record['placeofperformancecongressionaldistrict']))
+    new_record['place_of_performance_congressional_district_redundant'] = upper_case(nullify_text(record['pop_cd']))
     new_record['product_or_service_category'] = nullify_text(record['psc_cat'])
     new_record['product_or_service_code'] = left_text_and_upper(record['productorservicecode'])
     new_record['system_or_equipment_code'] = left_text_and_upper(record['systemequipmentcode'])

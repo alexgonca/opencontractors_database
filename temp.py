@@ -1,3 +1,6 @@
+# First time: Full indexes..*]: 
+
+
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 

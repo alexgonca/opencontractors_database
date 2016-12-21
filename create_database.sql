@@ -1,19 +1,42 @@
-CREATE TABLE IF NOT EXISTS transaction_status (
+\timing
+\set ECHO all
+\set VERBOSITY verbose
+
+BEGIN;
+
+CREATE SCHEMA IF NOT EXISTS oc_perennial;
+CREATE SCHEMA IF NOT EXISTS oc_ephemeral_alpha;
+CREATE SCHEMA IF NOT EXISTS oc_ephemeral_beta;
+
+CREATE TABLE IF NOT EXISTS oc_perennial.active_schema (
+  onerow_id bool PRIMARY KEY DEFAULT TRUE,
+  CONSTRAINT onerow_uni CHECK (onerow_id),
+  active_schema VARCHAR(18),
+  CONSTRAINT valid_active_schemas
+  CHECK (active_schema = 'oc_ephemeral_alpha' OR active_schema = 'oc_ephemeral_beta')
+);
+
+INSERT INTO oc_perennial.active_schema (active_schema)
+VALUES ('oc_ephemeral_alpha')
+ON CONFLICT (onerow_id)
+DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS oc_perennial.transaction_status (
   status VARCHAR(6) CONSTRAINT pk_transaction_status PRIMARY KEY
 );
 
-INSERT INTO transaction_status (status)
+INSERT INTO oc_perennial.transaction_status (status)
 VALUES ('active')
 ON CONFLICT (status)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS funded_by_foreign_entity(
+CREATE TABLE IF NOT EXISTS oc_perennial.funded_by_foreign_entity(
   code CHAR CONSTRAINT pk_funded_by_foreign_entity PRIMARY KEY,
   short_description TEXT,
   long_description TEXT
 );
 
-insert into funded_by_foreign_entity
+INSERT INTO oc_perennial.funded_by_foreign_entity
 (code, short_description, long_description) VALUES
   ('A', 'Foreign Funds FMS', 'A foreign government or international organization bears some of the cost of the acquisition through Foreign Military Sales.'),
   ('B', 'Foreign Funds non-FMS', 'A foreign government or international organizations bears some cost of the acquisition by means other than Foreign Military Sales.'),
@@ -22,12 +45,12 @@ insert into funded_by_foreign_entity
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS contract_action_type (
+CREATE TABLE IF NOT EXISTS oc_perennial.contract_action_type (
   code        VARCHAR(8) CONSTRAINT pk_contract_action_type PRIMARY KEY,
   description TEXT
 );
 
-insert into contract_action_type
+INSERT INTO oc_perennial.contract_action_type
 (code, description) VALUES
   ('BPA', 'Blanket Purchase Agreement'),
   ('BPA Call', 'Blanket Purchase Agreement Call'),
@@ -40,12 +63,12 @@ insert into contract_action_type
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS reason_for_modification (
+CREATE TABLE IF NOT EXISTS oc_perennial.reason_for_modification (
   code        VARCHAR(1) CONSTRAINT pk_reason_for_modification PRIMARY KEY,
   description TEXT
 );
 
-insert into reason_for_modification
+INSERT INTO oc_perennial.reason_for_modification
 (code, description)
 VALUES
   ('A', 'Additional Work (new agreement, FAR part 6 applies)'),
@@ -71,12 +94,12 @@ VALUES
 ON CONFLICT(code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS type_of_contract_pricing (
+CREATE TABLE IF NOT EXISTS oc_perennial.type_of_contract_pricing (
   code        CHAR CONSTRAINT pk_type_of_contract_pricing PRIMARY KEY,
   description TEXT
 );
 
-insert into type_of_contract_pricing
+INSERT INTO oc_perennial.type_of_contract_pricing
 (code, description)
 VALUES
 ('A', 'Fixed Price Redetermination'),
@@ -98,13 +121,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS subcontract_plan (
+CREATE TABLE IF NOT EXISTS oc_perennial.subcontract_plan (
   code        CHAR CONSTRAINT pk_subcontract_plan PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into subcontract_plan
+INSERT INTO oc_perennial.subcontract_plan
 (code, name, description) VALUES
 ('A', 'Plan Not Included - No Subcontracting Possibilities', 'A Subcontracting Plan was ' ||
 'not included in the contract because subcontracting possibilities do not exist (FAR 19.705-2I)'),
@@ -128,13 +151,13 @@ insert into subcontract_plan
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS letter_contract (
+CREATE TABLE IF NOT EXISTS oc_perennial.letter_contract (
   code        CHAR CONSTRAINT pk_letter_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into letter_contract
+INSERT INTO oc_perennial.letter_contract
 (code, name, description) VALUES
 ('A', 'Letter Contract', 'The DCA or IDV contract is a Letter Contract or funding ' ||
       'modifications to a letter contract, prior to definitization.'),
@@ -148,13 +171,13 @@ ON CONFLICT (code)
 DO NOTHING;
 
 
-CREATE TABLE IF NOT EXISTS multiyear_contract (
+CREATE TABLE IF NOT EXISTS oc_perennial.multiyear_contract (
   code        CHAR CONSTRAINT pk_multiyear_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into multiyear_contract
+INSERT INTO oc_perennial.multiyear_contract
 (code, name, description)
 VALUES
   ('Y', 'Yes', 'Contract is a FAR 17.1 multiyear contract.'),
@@ -162,13 +185,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS performance_based_service_contract (
+CREATE TABLE IF NOT EXISTS oc_perennial.performance_based_service_contract (
   code        CHAR CONSTRAINT pk_performance_based_service_contract PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into performance_based_service_contract
+INSERT INTO oc_perennial.performance_based_service_contract
 (code, name, description) VALUES
 ('Y', 'Yes - Service where PBA is used.', 'Contract actions for services where: ' ||
       'For FY2004 and prior - 80% of the requirement is performance based, as ' ||
@@ -180,12 +203,12 @@ insert into performance_based_service_contract
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS contract_financing (
+CREATE TABLE IF NOT EXISTS oc_perennial.contract_financing (
   code        CHAR CONSTRAINT pk_contract_financing PRIMARY KEY,
   description TEXT
 );
 
-insert into contract_financing
+INSERT INTO oc_perennial.contract_financing
 (code, description) VALUES
 ('A', 'FAR 52.232-16 Progress Payments'),
 ('C', 'Percentage of Completion Progress Payments'),
@@ -197,12 +220,12 @@ insert into contract_financing
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS cost_or_pricing_data (
+CREATE TABLE IF NOT EXISTS oc_perennial.cost_or_pricing_data (
   code        CHAR CONSTRAINT pk_cost_or_pricing_data PRIMARY KEY,
   description TEXT
 );
 
-insert into cost_or_pricing_data
+INSERT INTO oc_perennial.cost_or_pricing_data
 (code, description) VALUES
 ('N', 'No'),
 ('W', 'Not Obtained - Waived'),
@@ -210,13 +233,13 @@ insert into cost_or_pricing_data
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS cost_accounting_standards_clause (
+CREATE TABLE IF NOT EXISTS oc_perennial.cost_accounting_standards_clause (
   code        CHAR CONSTRAINT pk_cost_accounting_standards_clause PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into cost_accounting_standards_clause
+INSERT INTO oc_perennial.cost_accounting_standards_clause
 (code, name, description)
 VALUES
   ('Y', 'Yes - CAS clause included', 'Action includes a Cost Accounting Standards clause.'),
@@ -225,13 +248,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS purchase_card_as_payment_method (
+CREATE TABLE IF NOT EXISTS oc_perennial.purchase_card_as_payment_method (
   code        CHAR CONSTRAINT pk_purchase_card_as_payment_method PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into purchase_card_as_payment_method
+INSERT INTO oc_perennial.purchase_card_as_payment_method
 (code, name, description)
 VALUES
   ('Y', 'Yes', 'Purchase Card was or will be used to pay the contractor.'),
@@ -239,17 +262,17 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS national_interest_action (
+CREATE TABLE IF NOT EXISTS oc_perennial.national_interest_action (
   code        VARCHAR(4) CONSTRAINT pk_national_interest_action PRIMARY KEY,
   description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS contingency_humanitarian_peacekeeping_operation (
+CREATE TABLE IF NOT EXISTS oc_perennial.contingency_humanitarian_peacekeeping_operation (
   code        VARCHAR(1) CONSTRAINT pk_contingency_humanitarian_peacekeeping_operation PRIMARY KEY,
   description TEXT
 );
 
-insert into contingency_humanitarian_peacekeeping_operation
+INSERT INTO oc_perennial.contingency_humanitarian_peacekeeping_operation
 (code, description) VALUES
 ('A', 'Contingency operation as defined in 10 U.S.C. 101(a)(13)'),
 ('B', 'Humanitarian or peacekeeping operation as defined in 10 U.S.C. 2302(8)'),
@@ -257,7 +280,7 @@ insert into contingency_humanitarian_peacekeeping_operation
 ON CONFLICT (code)
 DO NOTHING;
 
-insert into national_interest_action
+INSERT INTO oc_perennial.national_interest_action
 (code, description)
 VALUES
 ('H13S', 'HURRICANE SANDY 2013'),
@@ -288,23 +311,23 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS recovery_flag (
+CREATE TABLE IF NOT EXISTS oc_perennial.recovery_flag (
   code        TEXT CONSTRAINT pk_recovery_flag PRIMARY KEY,
   description TEXT
 );
 
-insert into recovery_flag
+INSERT INTO oc_perennial.recovery_flag
 (code, description) VALUES
 ('ARRA', 'AMERICAN RECOVERY AND REINVESTMENT ACT')
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS type_of_idc (
+CREATE TABLE IF NOT EXISTS oc_perennial.type_of_idc (
   code        CHAR CONSTRAINT pk_type_of_idc PRIMARY KEY,
   description TEXT
 );
 
-insert into type_of_idc
+INSERT INTO oc_perennial.type_of_idc
 (code, description) VALUES
 ('A', 'Indefinite Delivery / Requirements'),
 ('B', 'Indefinite Delivery / Indefinite Quantity'),
@@ -312,13 +335,13 @@ insert into type_of_idc
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS multiple_or_single_award_idc (
+CREATE TABLE IF NOT EXISTS oc_perennial.multiple_or_single_award_idc (
   code        CHAR CONSTRAINT pk_multiple_or_single_award_idc PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into multiple_or_single_award_idc
+INSERT INTO oc_perennial.multiple_or_single_award_idc
 (code, name, description)
 VALUES
   ('M', 'Multiple Award', 'The contract is one of several awarded under a single solicitation when contracting officers are required to compare or compete their requirements among several vendors.'),
@@ -326,13 +349,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS ccr_exception (
+CREATE TABLE IF NOT EXISTS oc_perennial.ccr_exception (
   code        CHAR CONSTRAINT pk_ccr_exception PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into ccr_exception
+INSERT INTO oc_perennial.ccr_exception
 (code, name, description)
 VALUES
 ('1',
@@ -374,20 +397,20 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS country (
+CREATE TABLE IF NOT EXISTS oc_perennial.country (
   code VARCHAR(3) CONSTRAINT pk_country PRIMARY KEY,
   name TEXT
 );
 
 
-CREATE TABLE IF NOT EXISTS country_variation (
+CREATE TABLE IF NOT EXISTS oc_perennial.country_variation (
   code VARCHAR(3),
   name TEXT,
   CONSTRAINT pk_country_variation PRIMARY KEY (code, name),
-  CONSTRAINT fk_country_variation FOREIGN KEY (code) REFERENCES country (code)
+  CONSTRAINT fk_country_variation FOREIGN KEY (code) REFERENCES oc_perennial.country (code)
 );
 
-INSERT INTO country
+INSERT INTO oc_perennial.country
 (code, name)
 VALUES
 ('ABW', 'ARUBA'),
@@ -641,7 +664,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-INSERT INTO country_variation
+INSERT INTO oc_perennial.country_variation
 (code, name)
 VALUES
 ('ABW', 'ARUBA'),
@@ -911,22 +934,13 @@ VALUES
 ON CONFLICT (code, name)
 DO NOTHING;
 
-CREATE TYPE state_status_type AS ENUM
-('Undisclosed information (security reasons)',
-'US military mail code',
-'State',
-'Commonwealth or Territory',
-'Federal district',
-'Freely associated state',
-'usaspending.gov error');
-
-CREATE TABLE IF NOT EXISTS state (
+CREATE TABLE IF NOT EXISTS oc_perennial.state (
   code VARCHAR(2) CONSTRAINT pk_state PRIMARY KEY,
   description TEXT,
-  status state_status_type
+  status TEXT
 );
 
-INSERT INTO state
+INSERT INTO oc_perennial.state
 (code, description, status) VALUES
 ('98', 'NONDISTRIBUTED', 'Undisclosed information (security reasons)'),
 ('AA', 'ARMED FORCES - AMERICA', 'US military mail code'),
@@ -996,12 +1010,12 @@ INSERT INTO state
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS product_or_service_category (
+CREATE TABLE IF NOT EXISTS oc_perennial.product_or_service_category (
   code VARCHAR(2) CONSTRAINT pk_product_or_service_category PRIMARY KEY,
   description TEXT
 );
 
-insert into product_or_service_category
+INSERT INTO oc_perennial.product_or_service_category
 (code, description)
 VALUES
 ('A', 'Research and Development'),
@@ -1109,7 +1123,7 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS product_or_service_code (
+CREATE TABLE IF NOT EXISTS oc_perennial.product_or_service_code (
   code VARCHAR(4) CONSTRAINT pk_product_or_service_code PRIMARY KEY,
   description TEXT,
   start_date DATE,
@@ -1120,7 +1134,7 @@ CREATE TABLE IF NOT EXISTS product_or_service_code (
   includes TEXT
 );
 
-INSERT INTO product_or_service_code
+INSERT INTO oc_perennial.product_or_service_code
 (code, description, start_date, final_date, full_description, excludes, notes, includes)
 values
 ('10', 'WEAPONS', to_date('10/01/1979', 'MM/DD/YYYY'), NULL, NULL, NULL, 'This group includes combat weapons as well as weapon-like noncombat items, such as line throwing devices and pyrotechnic pistols.  Also included in this group are weapon neutralizing equipment, such as degaussers, and deception equipment, such as camouflage nets.  Excluded from this group are fire control and night devices classifiable in groups 12 or 58.', NULL),
@@ -4896,13 +4910,13 @@ values
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS claimant_program
+CREATE TABLE IF NOT EXISTS oc_perennial.claimant_program
 (
   code VARCHAR(3) constraint pk_claimant_program PRIMARY KEY,
   description TEXT
 );
 
-insert into claimant_program
+INSERT INTO oc_perennial.claimant_program
 (code, description)
 VALUES
 ('A1A', 'Airframes and Related Assemblies and Spares'),
@@ -4934,13 +4948,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS naics
+CREATE TABLE IF NOT EXISTS oc_perennial.naics
 (
   code VARCHAR(6) constraint fk_naics PRIMARY KEY,
   description TEXT
 );
 
-insert into naics
+INSERT INTO oc_perennial.naics
 (code, description)
 VALUES
 ('712130', 'ZOOS AND BOTANICAL GARDENS'),
@@ -6326,13 +6340,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS information_technology_commercial_item_category (
+CREATE TABLE IF NOT EXISTS oc_perennial.information_technology_commercial_item_category (
   code        VARCHAR(1) CONSTRAINT pk_information_technology_commercial_item_category PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into information_technology_commercial_item_category
+INSERT INTO oc_perennial.information_technology_commercial_item_category
 (code, name, description)
 VALUES
 ('A', 'Commercially Available', 'Item meets the definition of commercial item in FAR 2.101, does not require any modifications, and is available in the commercial marketplace.'),
@@ -6345,13 +6359,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS gfe_gfp
+CREATE TABLE IF NOT EXISTS oc_perennial.gfe_gfp
 (
   code CHAR constraint fk_gfe_gfp PRIMARY KEY,
   description TEXT
 );
 
-insert into gfe_gfp
+INSERT INTO oc_perennial.gfe_gfp
 (code, description)
 VALUES
 ('Y', 'Transaction uses GFE/GFP'),
@@ -6359,13 +6373,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS gfe_gfp
+CREATE TABLE IF NOT EXISTS oc_perennial.gfe_gfp
 (
   code CHAR constraint fk_gfe_gfp PRIMARY KEY,
   description TEXT
 );
 
-insert into gfe_gfp
+INSERT INTO oc_perennial.gfe_gfp
 (code, description)
 VALUES
 ('Y', 'Transaction uses GFE/GFP'),
@@ -6375,13 +6389,13 @@ DO NOTHING;
 
 
 
-CREATE TABLE if not exists use_of_epa_designated_products (
+CREATE TABLE IF NOT EXISTS oc_perennial.use_of_epa_designated_products (
   code        VARCHAR(1) CONSTRAINT pk_use_of_epa_designated_products PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into use_of_epa_designated_products
+INSERT INTO oc_perennial.use_of_epa_designated_products
 (code, name, description)
 VALUES
 ('A', 'Meets Requirements', 'EPA-designated products were required to be purchased that contain the required minimum recovered material content.'),
@@ -6392,13 +6406,13 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS recovered_material_clauses
+CREATE TABLE IF NOT EXISTS oc_perennial.recovered_material_clauses
 (
   code CHAR constraint fk_recovered_material_clauses PRIMARY KEY,
   description TEXT
 );
 
-insert into recovered_material_clauses
+INSERT INTO oc_perennial.recovered_material_clauses
 (code, description) VALUES
 ('A', 'FAR 52.223-4 Included'),
 ('B', 'FAR 52.223-4 and FAR 52.223-9 Included'),
@@ -6415,13 +6429,13 @@ insert into recovered_material_clauses
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS sea_transportation (
+CREATE TABLE IF NOT EXISTS oc_perennial.sea_transportation (
   code        VARCHAR(1) CONSTRAINT pk_sea_transportation PRIMARY KEY,
   name        TEXT,
   description TEXT
 );
 
-insert into sea_transportation
+INSERT INTO oc_perennial.sea_transportation
 (code, name, description)
 VALUES
 ('Y', 'Yes', 'Positive Response to DFARS 252.247-7022 or 252.212-7000(c)(2)'),
@@ -6430,14 +6444,14 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS contract_bundling
+CREATE TABLE IF NOT EXISTS oc_perennial.contract_bundling
 (
   code CHAR CONSTRAINT pk_contract_bundling PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into contract_bundling
+INSERT INTO oc_perennial.contract_bundling
 (code, name, description) VALUES
 ('A', 'Mission Critical', 'Agency has determined that the consolidated requirements is critical to the agency''s mission, but the measurably substantial benefits do not meet the thresholds set forth in the FAR 7.107 to determine that the consolidation is necessary and justified.'),
 ('B', 'OMB Circular A-76', 'Agency used the OMB Circular A-76 process to determine that the consolidation of the requirements is necessary and justified rather than applying the substantial benefits analysis required by FAR 7.107.'),
@@ -6447,28 +6461,28 @@ insert into contract_bundling
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS consolidated_contract
+CREATE TABLE IF NOT EXISTS oc_perennial.consolidated_contract
 (
   code CHAR CONSTRAINT pk_consolidated_contract PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into consolidated_contract
+INSERT INTO oc_perennial.consolidated_contract
 (code, name, description) VALUES
 ('Y', 'Yes', 'Contract action is: (1) for a contract or order awarded by DoD or with DoD funding (2) with an estimated total value that exceeds the threshold and (3) the action is a consolidation of contract requirements.'),
 ('N', 'No', 'Contract or order is not funded by DoD, or contract or order: (1) has an estimated total value less than or equal to the threshold; (2) has been reported as a Bundled Contract or (3) is not a consolidation of contract requirements.')
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS place_of_manufacture
+CREATE TABLE IF NOT EXISTS oc_perennial.place_of_manufacture
 (
   code CHAR CONSTRAINT pk_place_of_manufacture PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into place_of_manufacture
+INSERT INTO oc_perennial.place_of_manufacture
 (code, name, description) VALUES
 ('A', 'Performed or Manufactured in US, but services performed by a foreign concern or more than 50% foreign content', 'The action is for (i) A foreign end product that is manufactured in the United States but still determined to be foreign because 50 percent or more of the cost of its components is not mined, produced, or manufactured inside the United States or inside qualifying countries; or (ii) Services performed in the United States by a foreign concern. Note: This value is not valid after Sept 30, 2006.'),
 ('B', 'Performed or Manufactured outside US', 'The action is for (i) Any other foreign end product; or (ii) Services performed outside the United States by a foreign concern. Note: This value is not valid after Sept 30, 2006.'),
@@ -6487,13 +6501,13 @@ and 225.872-1)'),
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS manufacturing_organization_type
+CREATE TABLE IF NOT EXISTS oc_perennial.manufacturing_organization_type
 (
   code CHAR CONSTRAINT pk_manufacturing_organization_type PRIMARY KEY,
   description TEXT
 );
 
-insert into manufacturing_organization_type
+INSERT INTO oc_perennial.manufacturing_organization_type
 (code, description) VALUES
 ('A', 'U.S. Owned Business'),
 ('B', 'Other U.S. Entity (e.g. Government)'),
@@ -6504,14 +6518,14 @@ insert into manufacturing_organization_type
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS extent_competed
+CREATE TABLE IF NOT EXISTS oc_perennial.extent_competed
 (
   code VARCHAR(3) CONSTRAINT pk_extent_competed PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into extent_competed
+INSERT INTO oc_perennial.extent_competed
 (code, name, description) VALUES
 ('A', 'Full and Open Competition', 'Action resulted from an award pursuant to FAR 6.102(a) - sealed bid, FAR 6.102(b) - competitive proposal, FAR 6.102(c) - Combination, or any other competitive method that did not exclude sources of any type'),
 ('B', 'Not Available for Competition', 'Contract is not available for competition'),
@@ -6525,14 +6539,14 @@ insert into extent_competed
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS reason_not_competed
+CREATE TABLE IF NOT EXISTS oc_perennial.reason_not_competed
 (
   code VARCHAR(3) CONSTRAINT pk_reason_not_competed PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into reason_not_competed
+INSERT INTO oc_perennial.reason_not_competed
 (code, name, description) VALUES
 ('UNQ', 'Unique Source (FAR 6.302-1(b)(1))', 'Action was justified pursuant to FAR 6.302-1(b)(1)'),
 ('FOC', 'Follow-On Contract (FAR 6.302-1(a)(2)(ii/iii))', 'For a Definitive Contract, action was justified pursuant to FAR 6.302-1(a)(2)(ii) or FAR 6.302-1(a)(2)(iii).'),
@@ -6555,13 +6569,13 @@ insert into reason_not_competed
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS commercial_item_acquisition_procedures(
+CREATE TABLE IF NOT EXISTS oc_perennial.commercial_item_acquisition_procedures(
   code CHAR CONSTRAINT pk_commercial_item_acquisition_procedures PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into commercial_item_acquisition_procedures
+INSERT INTO oc_perennial.commercial_item_acquisition_procedures
 (code, name, description) VALUES
 ('A','Commercial Item', 'Select this value when the action is for a commercial item using FAR Part 12 commercial item procedures.'),
 ('B', 'Supplies or services pursuant to FAR 12.102(f)', 'Select this value for any acquisition of supplies or services, determined by the head of the agency, to be used to facilitate defense against or recovery from nuclear, biological, chemical, or radiological attack pursuant to FAR 12.102(f) that uses commercial item procedures.'),
@@ -6570,56 +6584,56 @@ insert into commercial_item_acquisition_procedures
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS commercial_item_test_program
+CREATE TABLE IF NOT EXISTS oc_perennial.commercial_item_test_program
 (
   code CHAR CONSTRAINT pk_commercial_item_test_program PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into commercial_item_test_program
+INSERT INTO oc_perennial.commercial_item_test_program
 (code, name, description) VALUES
   ('Y', 'Yes', 'Commercial Item Test Program used'),
   ('N', 'No', 'Not a Commercial Item Test Program')
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS small_business_competitiveness_demonstration_program
+CREATE TABLE IF NOT EXISTS oc_perennial.small_business_competitiveness_demonstration_program
 (
   code CHAR CONSTRAINT pk_small_business_competitiveness_demonstration_program PRIMARY KEY,
   name VARCHAR(3),
   description TEXT
 );
 
-insert into small_business_competitiveness_demonstration_program
+INSERT INTO oc_perennial.small_business_competitiveness_demonstration_program
 (code, name, description) VALUES
 ('Y', 'Yes', 'Contracting Agency Code indicates a participating agency listed in FAR 19.1004 and NAICS indicates one of the Industry Groups listed in FAR 19.1005 and/or Agency-Specified Industry Categories and Referenced PIID does not point to an IDV for which IDV Type = FSS and Business Types does not indicate a governmental entity, or educational or non-profit organization and other provisions of FAR 19.10 are met.'),
 ('N', 'No', 'Yes does not apply.')
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS a76action
+CREATE TABLE IF NOT EXISTS oc_perennial.a76action
 (
   code CHAR CONSTRAINT pk_a76action PRIMARY KEY,
   name VARCHAR(3),
   description TEXT
 );
 
-insert into a76action
+INSERT INTO oc_perennial.a76action
 (code, name, description) VALUES
 ('Y', 'Yes', 'Contract action resulted from an A-76/Fair Act competitive sourcing process.'),
 ('N', 'No', 'Contract action did not result from an A-76/Fair Act competitive sourcing process.')
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS solicitation_procedures
+CREATE TABLE IF NOT EXISTS oc_perennial.solicitation_procedures
 (
   code VARCHAR(4) CONSTRAINT pk_solicitation_procedures PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into solicitation_procedures
+INSERT INTO oc_perennial.solicitation_procedures
 (code, name, description) VALUES
   ('NP', 'Negotiated Proposal/Quote', 'Report this code for contract awards over the Simplified Acquisition Threshold using negotiated procedures. FAR 12, FAR 13, and FAR15.'),
   ('SB', 'Sealed Bid', 'Report this code for contract award over the Simplified Acquisition Threshold using seal bidding procedures. FAR 14.'),
@@ -6634,14 +6648,14 @@ insert into solicitation_procedures
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS type_of_set_aside
+CREATE TABLE IF NOT EXISTS oc_perennial.type_of_set_aside
 (
   code VARCHAR(8) CONSTRAINT pk_type_of_set_aside PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into type_of_set_aside
+INSERT INTO oc_perennial.type_of_set_aside
 (code, name, description) VALUES
   ('NONE', 'No set aside used.', 'Report this code if the contract award was not a socio-economic program set-aside.'),
   ('SBA', 'Small Business Set Aside - Total', 'Report this code for a small business set aside.'),
@@ -6673,13 +6687,13 @@ insert into type_of_set_aside
 on conflict (code)
 do nothing;
 
-create table IF NOT EXISTS local_area_set_aside
+CREATE TABLE IF NOT EXISTS oc_perennial.local_area_set_aside
 (
   code CHAR CONSTRAINT fk_local_area_set_aside PRIMARY KEY,
   description TEXT
 );
 
-insert into local_area_set_aside
+INSERT INTO oc_perennial.local_area_set_aside
 (code, description) VALUES
 ('Y','Yes'),
 ('N','No'),
@@ -6687,14 +6701,14 @@ insert into local_area_set_aside
 on conflict (code)
 do nothing;
 
-create table IF NOT EXISTS evaluated_preference
+CREATE TABLE IF NOT EXISTS oc_perennial.evaluated_preference
 (
   code VARCHAR(4) CONSTRAINT pk_evaluated_preference PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into evaluated_preference
+INSERT INTO oc_perennial.evaluated_preference
 (code, name, description) VALUES
   ('NONE', 'No Preference used', 'Report this code if no evaluation preference was used in this action'),
   ('SDA', 'SDB Price Evaluation Adjustment', 'Report this code for an award made through full and open competition with award to a small disadvantaged business as a result of the application of a price evaluation adjustment pursuant to FAR 19.11. This value cannot be selected after 10/13/2014.'),
@@ -6704,14 +6718,14 @@ insert into evaluated_preference
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS fedbizopps
+CREATE TABLE IF NOT EXISTS oc_perennial.fedbizopps
 (
   code CHAR CONSTRAINT pk_fedbizopps PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into fedbizopps
+INSERT INTO oc_perennial.fedbizopps
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction subject to FedBizOpps'),
   ('N', 'No', 'Transaction subject to FAR 5.102 or 5.202 exception'),
@@ -6719,14 +6733,14 @@ insert into fedbizopps
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS research
+CREATE TABLE IF NOT EXISTS oc_perennial.research
 (
   code VARCHAR(3) CONSTRAINT fk_research PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into research
+INSERT INTO oc_perennial.research
 (code, name, description) VALUES
   ('SR1', 'SBIR Program Phase I Action', 'Use this code if the award was related to a Phase I contract in support of the Small Business Innovation Research (SBIR) Program.'),
   ('SR2', 'SBIR Program Phase II Action', 'Use this code if the award was related to a Phase II contract in support of the Small Business Innovation Research (SBIR) Program.'),
@@ -6737,14 +6751,14 @@ insert into research
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS statutory_exception_to_fair_opportunity
+CREATE TABLE IF NOT EXISTS oc_perennial.statutory_exception_to_fair_opportunity
 (
   code VARCHAR(4) CONSTRAINT pk_statutory_exception_to_fair_opportunity PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into statutory_exception_to_fair_opportunity
+INSERT INTO oc_perennial.statutory_exception_to_fair_opportunity
 (code, name, description) VALUES
   ('URG', 'Urgency', 'Report this code if the action was justified pursuant to FAR 16.505(b)(2)(i)(A).'),
   ('ONE', 'Only One Source - Other', 'Report this code if the action was justified pursuant ONE FAR 16.505(b)(2)(i)(B).'),
@@ -6757,12 +6771,12 @@ insert into statutory_exception_to_fair_opportunity
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS flag_value(
+CREATE TABLE IF NOT EXISTS oc_perennial.flag_value(
   code CHAR CONSTRAINT pk_flag_value PRIMARY KEY,
   description TEXT
 );
 
-INSERT INTO flag_value
+INSERT INTO oc_perennial.flag_value
 (code, description)
 VALUES
   ('Y', 'Yes'),
@@ -6770,7 +6784,7 @@ VALUES
 on conflict (code)
 do nothing;
 
-CREATE TABLE IF NOT EXISTS flag(
+CREATE TABLE IF NOT EXISTS oc_perennial.flag(
   flag_name TEXT CONSTRAINT pk_flag PRIMARY KEY,
   category TEXT,
   display_name TEXT,
@@ -6778,7 +6792,7 @@ CREATE TABLE IF NOT EXISTS flag(
   link TEXT
 );
 
-insert into flag
+INSERT INTO oc_perennial.flag
 (flag_name, category, display_name, description, link)
 VALUES
 ('aiobflag', 'demographic', 'American Indian owned business', 'A Native American is a member of any of the indigenous people of the Western Hemisphere.', 'http://www.sba.gov/about-offices-content/1/2960'),
@@ -6870,14 +6884,14 @@ VALUES
 on conflict(flag_name)
 do nothing;
 
-create table IF NOT EXISTS walsh_healy_act
+CREATE TABLE IF NOT EXISTS oc_perennial.walsh_healy_act
 (
   code CHAR CONSTRAINT pk_walsh_healy_act PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into walsh_healy_act
+INSERT INTO oc_perennial.walsh_healy_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Walsh Healy Act.'),
   ('N', 'No', 'Transaction is not subject to Walsh Healy Act.'),
@@ -6885,14 +6899,14 @@ insert into walsh_healy_act
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS service_contract_act
+CREATE TABLE IF NOT EXISTS oc_perennial.service_contract_act
 (
   code CHAR CONSTRAINT pk_service_contract_act PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into service_contract_act
+INSERT INTO oc_perennial.service_contract_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Service Contract Act.'),
   ('N', 'No', 'Transaction is not subject to Service Contract Act.'),
@@ -6900,14 +6914,14 @@ insert into service_contract_act
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS davis_bacon_act
+CREATE TABLE IF NOT EXISTS oc_perennial.davis_bacon_act
 (
   code CHAR CONSTRAINT pk_davis_bacon_act PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into davis_bacon_act
+INSERT INTO oc_perennial.davis_bacon_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Davis Bacon Act.'),
   ('N', 'No', 'Transaction is not subject to Davis Bacon Act.'),
@@ -6915,28 +6929,28 @@ insert into davis_bacon_act
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS clinger_cohen_act
+CREATE TABLE IF NOT EXISTS oc_perennial.clinger_cohen_act
 (
   code CHAR CONSTRAINT pk_clinger_cohen_act PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into clinger_cohen_act
+INSERT INTO oc_perennial.clinger_cohen_act
 (code, name, description) VALUES
   ('Y', 'Yes', 'Transaction is subject to Clinger Cohen Act compliance.'),
   ('N', 'No', 'Transaction is not subject to Clinger Cohen Act compliance.')
 ON CONFLICT (code)
 DO NOTHING;
 
-create table IF NOT EXISTS interagency_contracting_authority
+CREATE TABLE IF NOT EXISTS oc_perennial.interagency_contracting_authority
 (
   code CHAR CONSTRAINT pk_interagency_contracting_authority PRIMARY KEY,
   name TEXT,
   description TEXT
 );
 
-insert into interagency_contracting_authority
+INSERT INTO oc_perennial.interagency_contracting_authority
 (code, name, description) VALUES
 ('A', 'Economy Act', 'Report this code if the transaction is subject to the Economy Act.'),
 ('B', 'Other Statutory Authority', 'Transaction is subject to other interagency contracting Statutory Authority.'),
@@ -6944,25 +6958,25 @@ insert into interagency_contracting_authority
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS business_size(
+CREATE TABLE IF NOT EXISTS oc_perennial.business_size(
   code CHAR CONSTRAINT pk_business_size PRIMARY KEY,
   description TEXT
 );
 
-INSERT INTO business_size
+INSERT INTO oc_perennial.business_size
 (code, description) VALUES
   ('O', 'OTHER THAN SMALL BUSINESS'),
   ('S', 'SMALL BUSINESS')
 ON CONFLICT (code)
 DO NOTHING;
 
-CREATE TABLE IF NOT EXISTS contract_all (
-  id SERIAL CONSTRAINT pk_contract PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS oc_perennial.contract_all (
+  id SERIAL CONSTRAINT pk_contract_all PRIMARY KEY,
   unique_transaction_id VARCHAR(32) NOT NULL,
   last_modified_date DATE NOT NULL,
   CONSTRAINT u_contract unique (unique_transaction_id, last_modified_date),
   transaction_status VARCHAR(6),
-  CONSTRAINT fk_transaction_status FOREIGN KEY (transaction_status) REFERENCES transaction_status(status),
+  CONSTRAINT fk_transaction_status FOREIGN KEY (transaction_status) REFERENCES oc_perennial.transaction_status(status),
   dollars_obligated MONEY,
   base_and_exercised_options_value MONEY,
   base_and_all_options_value MONEY,
@@ -6981,52 +6995,52 @@ CREATE TABLE IF NOT EXISTS contract_all (
   funding_office_id VARCHAR(6),
   funding_office_name TEXT,
   funded_by_foreign_entity CHAR,
-  CONSTRAINT fk_funded_by_foreign_entity FOREIGN KEY (funded_by_foreign_entity) REFERENCES funded_by_foreign_entity(code),
+  CONSTRAINT fk_funded_by_foreign_entity FOREIGN KEY (funded_by_foreign_entity) REFERENCES oc_perennial.funded_by_foreign_entity(code),
   signed_date DATE,
   effective_date DATE,
   current_completion_date DATE,
   ultimate_completion_date DATE,
   last_date_to_order DATE,
   contract_action_type VARCHAR(8),
-  CONSTRAINT fk_contract_action_type FOREIGN KEY (contract_action_type) REFERENCES contract_action_type (code),
+  CONSTRAINT fk_contract_action_type FOREIGN KEY (contract_action_type) REFERENCES oc_perennial.contract_action_type (code),
   reason_for_modification CHAR,
-  CONSTRAINT fk_reason_for_modification FOREIGN KEY (reason_for_modification) REFERENCES reason_for_modification (code),
+  CONSTRAINT fk_reason_for_modification FOREIGN KEY (reason_for_modification) REFERENCES oc_perennial.reason_for_modification (code),
   type_of_contract_pricing VARCHAR(2),
-  CONSTRAINT fk_type_of_contract_pricing FOREIGN KEY (type_of_contract_pricing) REFERENCES type_of_contract_pricing (code),
+  CONSTRAINT fk_type_of_contract_pricing FOREIGN KEY (type_of_contract_pricing) REFERENCES oc_perennial.type_of_contract_pricing (code),
   price_evaluation_percent_difference REAL,
   subcontract_plan CHAR,
-  CONSTRAINT fk_subcontract_plan FOREIGN KEY (subcontract_plan) REFERENCES subcontract_plan (code),
+  CONSTRAINT fk_subcontract_plan FOREIGN KEY (subcontract_plan) REFERENCES oc_perennial.subcontract_plan (code),
   letter_contract CHAR,
-  CONSTRAINT fk_letter_contract FOREIGN KEY (letter_contract) REFERENCES letter_contract (code),
+  CONSTRAINT fk_letter_contract FOREIGN KEY (letter_contract) REFERENCES oc_perennial.letter_contract (code),
   multiyear_contract CHAR,
-  CONSTRAINT fk_multiyear_contract FOREIGN KEY (multiyear_contract) REFERENCES multiyear_contract (code),
+  CONSTRAINT fk_multiyear_contract FOREIGN KEY (multiyear_contract) REFERENCES oc_perennial.multiyear_contract (code),
   performance_based_service_contract CHAR,
-  CONSTRAINT fk_performance_based_service_contract FOREIGN KEY (performance_based_service_contract) REFERENCES performance_based_service_contract (code),
+  CONSTRAINT fk_performance_based_service_contract FOREIGN KEY (performance_based_service_contract) REFERENCES oc_perennial.performance_based_service_contract (code),
   major_program_code TEXT,
   contingency_humanitarian_peacekeeping_operation CHAR,
-  CONSTRAINT fk_contingency_humanitarian_peacekeeping_operation FOREIGN KEY (contingency_humanitarian_peacekeeping_operation) REFERENCES contingency_humanitarian_peacekeeping_operation (code),
+  CONSTRAINT fk_contingency_humanitarian_peacekeeping_operation FOREIGN KEY (contingency_humanitarian_peacekeeping_operation) REFERENCES oc_perennial.contingency_humanitarian_peacekeeping_operation (code),
   contract_financing CHAR,
-  CONSTRAINT fk_contract_financing FOREIGN KEY (contract_financing) REFERENCES contract_financing (code),
+  CONSTRAINT fk_contract_financing FOREIGN KEY (contract_financing) REFERENCES oc_perennial.contract_financing (code),
   cost_or_pricing_data CHAR,
-  CONSTRAINT fk_cost_or_pricing_data FOREIGN KEY (cost_or_pricing_data) REFERENCES cost_or_pricing_data(code),
+  CONSTRAINT fk_cost_or_pricing_data FOREIGN KEY (cost_or_pricing_data) REFERENCES oc_perennial.cost_or_pricing_data(code),
   cost_accounting_standards_clause CHAR,
-  CONSTRAINT fk_cost_accounting_standards_clause FOREIGN KEY (cost_accounting_standards_clause) REFERENCES cost_accounting_standards_clause(code),
+  CONSTRAINT fk_cost_accounting_standards_clause FOREIGN KEY (cost_accounting_standards_clause) REFERENCES oc_perennial.cost_accounting_standards_clause(code),
   descriptionofcontractrequirement TEXT,
   purchase_card_as_payment_method CHAR,
-  CONSTRAINT fk_purchase_card_as_payment_method FOREIGN KEY (purchase_card_as_payment_method) REFERENCES purchase_card_as_payment_method(code),
+  CONSTRAINT fk_purchase_card_as_payment_method FOREIGN KEY (purchase_card_as_payment_method) REFERENCES oc_perennial.purchase_card_as_payment_method(code),
   number_of_actions INTEGER,
   national_interest_action VARCHAR(4),
-  CONSTRAINT fk_national_interest_action FOREIGN KEY (national_interest_action) REFERENCES national_interest_action(code),
+  CONSTRAINT fk_national_interest_action FOREIGN KEY (national_interest_action) REFERENCES oc_perennial.national_interest_action(code),
   prog_source_agency VARCHAR(2),
   prog_source_account VARCHAR(4),
   prog_source_subacct VARCHAR(3),
   account_title TEXT,
   recovery_flag VARCHAR(4),
-  CONSTRAINT fk_recovery_flag FOREIGN KEY (recovery_flag) REFERENCES recovery_flag(code),
+  CONSTRAINT fk_recovery_flag FOREIGN KEY (recovery_flag) REFERENCES oc_perennial.recovery_flag(code),
   type_of_idc CHAR,
-  CONSTRAINT fk_type_of_idc FOREIGN KEY (type_of_idc) REFERENCES type_of_idc(code),
+  CONSTRAINT fk_type_of_idc FOREIGN KEY (type_of_idc) REFERENCES oc_perennial.type_of_idc(code),
   multiple_or_single_award_idc CHAR,
-  CONSTRAINT fk_multiple_or_single_award_idc FOREIGN KEY (multiple_or_single_award_idc) REFERENCES multiple_or_single_award_idc(code),
+  CONSTRAINT fk_multiple_or_single_award_idc FOREIGN KEY (multiple_or_single_award_idc) REFERENCES oc_perennial.multiple_or_single_award_idc(code),
   program_acronym TEXT,
   contractor_name TEXT,
   contractor_alternate_name TEXT,
@@ -7037,18 +7051,18 @@ CREATE TABLE IF NOT EXISTS contract_all (
   contractor_enabled TEXT,
   contractor_location_disable_flag TEXT,
   contractor_ccr_exception CHAR,
-  CONSTRAINT fk_contractor_ccr_exception FOREIGN KEY (contractor_ccr_exception) REFERENCES ccr_exception(code),
+  CONSTRAINT fk_contractor_ccr_exception FOREIGN KEY (contractor_ccr_exception) REFERENCES oc_perennial.ccr_exception(code),
   contractor_street_address_1 TEXT,
   contractor_street_address_2 TEXT,
   contractor_street_address_3 TEXT,
   contractor_city TEXT,
   contractor_state VARCHAR(2),
-  CONSTRAINT fk_contractor_state FOREIGN KEY (contractor_state) REFERENCES state(code),
+  CONSTRAINT fk_contractor_state FOREIGN KEY (contractor_state) REFERENCES oc_perennial.state(code),
   contractor_other_location_info TEXT,
   contractor_state_other_info_redundant TEXT,
   contractor_zip_code TEXT,
   contractor_country VARCHAR(3),
-  CONSTRAINT fk_country FOREIGN KEY (contractor_country) REFERENCES country(code),
+  CONSTRAINT fk_country FOREIGN KEY (contractor_country) REFERENCES oc_perennial.country(code),
   contractor_congressional_district VARCHAR(4),
   contractor_congressional_district_redundant VARCHAR(4),
   contractor_site_code TEXT,
@@ -7063,44 +7077,44 @@ CREATE TABLE IF NOT EXISTS contract_all (
   location_code TEXT,
   place_of_performance_city TEXT,
   place_of_performance_state VARCHAR(2),
-  CONSTRAINT fk_place_of_performance_state FOREIGN KEY (place_of_performance_state) REFERENCES state(code),
+  CONSTRAINT fk_place_of_performance_state FOREIGN KEY (place_of_performance_state) REFERENCES oc_perennial.state(code),
   place_of_performance_state_redundant VARCHAR(2),
-  CONSTRAINT fk_place_of_performance_state_redundant FOREIGN KEY (place_of_performance_state_redundant) REFERENCES state(code),
+  CONSTRAINT fk_place_of_performance_state_redundant FOREIGN KEY (place_of_performance_state_redundant) REFERENCES oc_perennial.state(code),
   place_of_performance_country VARCHAR(3),
-  CONSTRAINT fk_place_of_performance_country FOREIGN KEY (place_of_performance_country) REFERENCES country(code),
+  CONSTRAINT fk_place_of_performance_country FOREIGN KEY (place_of_performance_country) REFERENCES oc_perennial.country(code),
   place_of_performance_zip_code TEXT,
   place_of_performance_congressional_district VARCHAR(4),
   place_of_performance_congressional_district_redundant VARCHAR(4),
   product_or_service_category VARCHAR(2),
-  CONSTRAINT fk_product_or_service_category FOREIGN KEY (product_or_service_category) REFERENCES product_or_service_category(code),
+  CONSTRAINT fk_product_or_service_category FOREIGN KEY (product_or_service_category) REFERENCES oc_perennial.product_or_service_category(code),
   product_or_service_code VARCHAR(4),
-  CONSTRAINT fk_product_or_service_code FOREIGN KEY (product_or_service_code) REFERENCES product_or_service_code(code),
+  CONSTRAINT fk_product_or_service_code FOREIGN KEY (product_or_service_code) REFERENCES oc_perennial.product_or_service_code(code),
   system_or_equipment_code VARCHAR(4),
   system_or_equipment_description TEXT,
   claimant_program VARCHAR(3),
-  CONSTRAINT fk_claimant_program FOREIGN KEY (claimant_program) REFERENCES claimant_program(code),
+  CONSTRAINT fk_claimant_program FOREIGN KEY (claimant_program) REFERENCES oc_perennial.claimant_program(code),
   naics VARCHAR(6),
-  CONSTRAINT fk_naics FOREIGN KEY (naics) REFERENCES naics(code),
+  CONSTRAINT fk_naics FOREIGN KEY (naics) REFERENCES oc_perennial.naics(code),
   information_technology_commercial_item_category CHAR,
-  CONSTRAINT fk_information_technology_commercial_item_category FOREIGN KEY (information_technology_commercial_item_category) REFERENCES information_technology_commercial_item_category(code),
+  CONSTRAINT fk_information_technology_commercial_item_category FOREIGN KEY (information_technology_commercial_item_category) REFERENCES oc_perennial.information_technology_commercial_item_category(code),
   gfe_gfp CHAR,
-  CONSTRAINT fk_gfe_gfp FOREIGN KEY (gfe_gfp) REFERENCES gfe_gfp(code),
+  CONSTRAINT fk_gfe_gfp FOREIGN KEY (gfe_gfp) REFERENCES oc_perennial.gfe_gfp(code),
   use_of_epa_designated_products CHAR,
-  CONSTRAINT fk_use_of_epa_designated_products FOREIGN KEY (use_of_epa_designated_products) REFERENCES use_of_epa_designated_products(code),
+  CONSTRAINT fk_use_of_epa_designated_products FOREIGN KEY (use_of_epa_designated_products) REFERENCES oc_perennial.use_of_epa_designated_products(code),
   recovered_material_clauses CHAR,
-  CONSTRAINT fk_recovered_material_clauses FOREIGN KEY (recovered_material_clauses) REFERENCES recovered_material_clauses(code),
+  CONSTRAINT fk_recovered_material_clauses FOREIGN KEY (recovered_material_clauses) REFERENCES oc_perennial.recovered_material_clauses(code),
   sea_transportation CHAR,
-  CONSTRAINT fk_sea_transportation FOREIGN KEY (sea_transportation) REFERENCES sea_transportation(code),
+  CONSTRAINT fk_sea_transportation FOREIGN KEY (sea_transportation) REFERENCES oc_perennial.sea_transportation(code),
   contract_bundling CHAR,
-  CONSTRAINT fk_contract_bundling FOREIGN KEY (contract_bundling) REFERENCES contract_bundling(code),
+  CONSTRAINT fk_contract_bundling FOREIGN KEY (contract_bundling) REFERENCES oc_perennial.contract_bundling(code),
   consolidated_contract CHAR,
-  CONSTRAINT fk_consolidated_contract FOREIGN KEY (consolidated_contract) REFERENCES consolidated_contract(code),
+  CONSTRAINT fk_consolidated_contract FOREIGN KEY (consolidated_contract) REFERENCES oc_perennial.consolidated_contract(code),
   country_of_origin VARCHAR(3),
-  CONSTRAINT fk_country_of_origin FOREIGN KEY (country_of_origin) REFERENCES country(code),
+  CONSTRAINT fk_country_of_origin FOREIGN KEY (country_of_origin) REFERENCES oc_perennial.country(code),
   place_of_manufacture CHAR,
-  CONSTRAINT fk_place_of_manufacture FOREIGN KEY (place_of_manufacture) REFERENCES place_of_manufacture(code),
+  CONSTRAINT fk_place_of_manufacture FOREIGN KEY (place_of_manufacture) REFERENCES oc_perennial.place_of_manufacture(code),
   manufacturing_organization_type CHAR,
-  CONSTRAINT fk_manufacturing_organization_type FOREIGN KEY (manufacturing_organization_type) REFERENCES manufacturing_organization_type(code),
+  CONSTRAINT fk_manufacturing_organization_type FOREIGN KEY (manufacturing_organization_type) REFERENCES oc_perennial.manufacturing_organization_type(code),
   agency_id VARCHAR(4),
   agency_name TEXT,
   piid TEXT,
@@ -7112,218 +7126,218 @@ CREATE TABLE IF NOT EXISTS contract_all (
   idv_modification_number TEXT,
   solicitation_id TEXT,
   extent_competed VARCHAR(3),
-  CONSTRAINT fk_extent_competed FOREIGN KEY (extent_competed) REFERENCES extent_competed(code),
+  CONSTRAINT fk_extent_competed FOREIGN KEY (extent_competed) REFERENCES oc_perennial.extent_competed(code),
   reason_not_competed VARCHAR(3),
-  CONSTRAINT fk_reason_not_competed FOREIGN KEY (reason_not_competed) REFERENCES reason_not_competed(code),
+  CONSTRAINT fk_reason_not_competed FOREIGN KEY (reason_not_competed) REFERENCES oc_perennial.reason_not_competed(code),
   number_of_offers_received INTEGER,
   commercial_item_acquisition_procedures CHAR,
-  CONSTRAINT fk_commercial_item_acquisition_procedures FOREIGN KEY (commercial_item_acquisition_procedures) REFERENCES commercial_item_acquisition_procedures(code),
+  CONSTRAINT fk_commercial_item_acquisition_procedures FOREIGN KEY (commercial_item_acquisition_procedures) REFERENCES oc_perennial.commercial_item_acquisition_procedures(code),
   commercial_item_test_program CHAR,
-  CONSTRAINT fk_commercial_item_test_program FOREIGN KEY (commercial_item_test_program) REFERENCES commercial_item_test_program(code),
+  CONSTRAINT fk_commercial_item_test_program FOREIGN KEY (commercial_item_test_program) REFERENCES oc_perennial.commercial_item_test_program(code),
   small_business_competitiveness_demonstration_program CHAR,
-  CONSTRAINT fk_small_business_competitiveness_demonstration_program FOREIGN KEY (small_business_competitiveness_demonstration_program) REFERENCES small_business_competitiveness_demonstration_program(code),
+  CONSTRAINT fk_small_business_competitiveness_demonstration_program FOREIGN KEY (small_business_competitiveness_demonstration_program) REFERENCES oc_perennial.small_business_competitiveness_demonstration_program(code),
   a76action CHAR,
-  CONSTRAINT fk_a76action FOREIGN KEY (a76action) REFERENCES a76action(code),
+  CONSTRAINT fk_a76action FOREIGN KEY (a76action) REFERENCES oc_perennial.a76action(code),
   competitive_procedures TEXT,
   solicitation_procedures VARCHAR(4),
-  CONSTRAINT fk_solicitation_procedures FOREIGN KEY (solicitation_procedures) REFERENCES solicitation_procedures(code),
+  CONSTRAINT fk_solicitation_procedures FOREIGN KEY (solicitation_procedures) REFERENCES oc_perennial.solicitation_procedures(code),
   type_of_set_aside VARCHAR(8),
-  CONSTRAINT fk_type_of_set_aside FOREIGN KEY (type_of_set_aside) REFERENCES type_of_set_aside(code),
+  CONSTRAINT fk_type_of_set_aside FOREIGN KEY (type_of_set_aside) REFERENCES oc_perennial.type_of_set_aside(code),
   local_area_set_aside CHAR,
-  CONSTRAINT fk_local_area_set_aside FOREIGN KEY (local_area_set_aside) REFERENCES local_area_set_aside(code),
+  CONSTRAINT fk_local_area_set_aside FOREIGN KEY (local_area_set_aside) REFERENCES oc_perennial.local_area_set_aside(code),
   evaluated_preference VARCHAR(4),
-  CONSTRAINT fk_evaluated_preference FOREIGN KEY (evaluated_preference) REFERENCES evaluated_preference(code),
+  CONSTRAINT fk_evaluated_preference FOREIGN KEY (evaluated_preference) REFERENCES oc_perennial.evaluated_preference(code),
   fedbizopps CHAR,
-  CONSTRAINT fk_fedbizopps FOREIGN KEY (fedbizopps) REFERENCES fedbizopps(code),
+  CONSTRAINT fk_fedbizopps FOREIGN KEY (fedbizopps) REFERENCES oc_perennial.fedbizopps(code),
   research VARCHAR(3),
-  CONSTRAINT fk_research FOREIGN KEY (research) REFERENCES research(code),
+  CONSTRAINT fk_research FOREIGN KEY (research) REFERENCES oc_perennial.research(code),
   statutory_exception_to_fair_opportunity VARCHAR(4),
-  CONSTRAINT fk_statutory_exception_to_fair_opportunity FOREIGN KEY (statutory_exception_to_fair_opportunity) REFERENCES statutory_exception_to_fair_opportunity(code),
+  CONSTRAINT fk_statutory_exception_to_fair_opportunity FOREIGN KEY (statutory_exception_to_fair_opportunity) REFERENCES oc_perennial.statutory_exception_to_fair_opportunity(code),
   contractor_organizational_type TEXT,
   contractor_number_of_employees BIGINT,
   contractor_annual_revenue MONEY,
   firm8aflag CHAR,
-  CONSTRAINT fk_firm8aflag FOREIGN KEY (firm8aflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_firm8aflag FOREIGN KEY (firm8aflag) REFERENCES oc_perennial.flag_value(code),
   hubzoneflag CHAR,
-  CONSTRAINT fk_hubzoneflag FOREIGN KEY (hubzoneflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_hubzoneflag FOREIGN KEY (hubzoneflag) REFERENCES oc_perennial.flag_value(code),
   sdbflag CHAR,
-  CONSTRAINT fk_sdbflag FOREIGN KEY (sdbflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_sdbflag FOREIGN KEY (sdbflag) REFERENCES oc_perennial.flag_value(code),
   issbacertifiedsmalldisadvantagedbusiness CHAR,
-  CONSTRAINT fk_issbacertifiedsmalldisadvantagedbusiness FOREIGN KEY (issbacertifiedsmalldisadvantagedbusiness) REFERENCES flag_value(code),
+  CONSTRAINT fk_issbacertifiedsmalldisadvantagedbusiness FOREIGN KEY (issbacertifiedsmalldisadvantagedbusiness) REFERENCES oc_perennial.flag_value(code),
   shelteredworkshopflag CHAR,
-  CONSTRAINT fk_shelteredworkshopflag FOREIGN KEY (shelteredworkshopflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_shelteredworkshopflag FOREIGN KEY (shelteredworkshopflag) REFERENCES oc_perennial.flag_value(code),
   hbcuflag CHAR,
-  CONSTRAINT fk_hbcuflag FOREIGN KEY (hbcuflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_hbcuflag FOREIGN KEY (hbcuflag) REFERENCES oc_perennial.flag_value(code),
   educationalinstitutionflag CHAR,
-  CONSTRAINT fk_educationalinstitutionflag FOREIGN KEY (educationalinstitutionflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_educationalinstitutionflag FOREIGN KEY (educationalinstitutionflag) REFERENCES oc_perennial.flag_value(code),
   womenownedflag CHAR,
-  CONSTRAINT fk_womenownedflag FOREIGN KEY (womenownedflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_womenownedflag FOREIGN KEY (womenownedflag) REFERENCES oc_perennial.flag_value(code),
   veteranownedflag CHAR,
-  CONSTRAINT fk_veteranownedflag FOREIGN KEY (veteranownedflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_veteranownedflag FOREIGN KEY (veteranownedflag) REFERENCES oc_perennial.flag_value(code),
   srdvobflag CHAR,
-  CONSTRAINT fk_srdvobflag FOREIGN KEY (srdvobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_srdvobflag FOREIGN KEY (srdvobflag) REFERENCES oc_perennial.flag_value(code),
   localgovernmentflag CHAR,
-  CONSTRAINT fk_localgovernmentflag FOREIGN KEY (localgovernmentflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_localgovernmentflag FOREIGN KEY (localgovernmentflag) REFERENCES oc_perennial.flag_value(code),
   minorityinstitutionflag CHAR,
-  CONSTRAINT fk_minorityinstitutionflag FOREIGN KEY (minorityinstitutionflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_minorityinstitutionflag FOREIGN KEY (minorityinstitutionflag) REFERENCES oc_perennial.flag_value(code),
   aiobflag CHAR,
-  CONSTRAINT fk_aiobflag FOREIGN KEY (aiobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_aiobflag FOREIGN KEY (aiobflag) REFERENCES oc_perennial.flag_value(code),
   stategovernmentflag CHAR,
-  CONSTRAINT fk_stategovernmentflag FOREIGN KEY (stategovernmentflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_stategovernmentflag FOREIGN KEY (stategovernmentflag) REFERENCES oc_perennial.flag_value(code),
   federalgovernmentflag CHAR,
-  CONSTRAINT fk_federalgovernmentflag FOREIGN KEY (federalgovernmentflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_federalgovernmentflag FOREIGN KEY (federalgovernmentflag) REFERENCES oc_perennial.flag_value(code),
   minorityownedbusinessflag CHAR,
-  CONSTRAINT fk_minorityownedbusinessflag FOREIGN KEY (minorityownedbusinessflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_minorityownedbusinessflag FOREIGN KEY (minorityownedbusinessflag) REFERENCES oc_perennial.flag_value(code),
   apaobflag CHAR,
-  CONSTRAINT fk_apaobflag FOREIGN KEY (apaobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_apaobflag FOREIGN KEY (apaobflag) REFERENCES oc_perennial.flag_value(code),
   tribalgovernmentflag CHAR,
-  CONSTRAINT fk_tribalgovernmentflag FOREIGN KEY (tribalgovernmentflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_tribalgovernmentflag FOREIGN KEY (tribalgovernmentflag) REFERENCES oc_perennial.flag_value(code),
   baobflag CHAR,
-  CONSTRAINT fk_baobflag FOREIGN KEY (baobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_baobflag FOREIGN KEY (baobflag) REFERENCES oc_perennial.flag_value(code),
   naobflag CHAR,
-  CONSTRAINT fk_naobflag FOREIGN KEY (naobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_naobflag FOREIGN KEY (naobflag) REFERENCES oc_perennial.flag_value(code),
   saaobflag CHAR,
-  CONSTRAINT fk_saaobflag FOREIGN KEY (saaobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_saaobflag FOREIGN KEY (saaobflag) REFERENCES oc_perennial.flag_value(code),
   nonprofitorganizationflag CHAR,
-  CONSTRAINT fk_nonprofitorganizationflag FOREIGN KEY (nonprofitorganizationflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_nonprofitorganizationflag FOREIGN KEY (nonprofitorganizationflag) REFERENCES oc_perennial.flag_value(code),
   isothernotforprofitorganization CHAR,
-  CONSTRAINT fk_isothernotforprofitorganization FOREIGN KEY (isothernotforprofitorganization) REFERENCES flag_value(code),
+  CONSTRAINT fk_isothernotforprofitorganization FOREIGN KEY (isothernotforprofitorganization) REFERENCES oc_perennial.flag_value(code),
   isforprofitorganization CHAR,
-  CONSTRAINT fk_isforprofitorganization FOREIGN KEY (isforprofitorganization) REFERENCES flag_value(code),
+  CONSTRAINT fk_isforprofitorganization FOREIGN KEY (isforprofitorganization) REFERENCES oc_perennial.flag_value(code),
   isfoundation CHAR,
-  CONSTRAINT fk_isfoundation FOREIGN KEY (isfoundation) REFERENCES flag_value(code),
+  CONSTRAINT fk_isfoundation FOREIGN KEY (isfoundation) REFERENCES oc_perennial.flag_value(code),
   haobflag CHAR,
-  CONSTRAINT fk_haobflag FOREIGN KEY (haobflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_haobflag FOREIGN KEY (haobflag) REFERENCES oc_perennial.flag_value(code),
   ishispanicservicinginstitution CHAR,
-  CONSTRAINT fk_ishispanicservicinginstitution FOREIGN KEY (ishispanicservicinginstitution) REFERENCES flag_value(code),
+  CONSTRAINT fk_ishispanicservicinginstitution FOREIGN KEY (ishispanicservicinginstitution) REFERENCES oc_perennial.flag_value(code),
   emergingsmallbusinessflag CHAR,
-  CONSTRAINT fk_emergingsmallbusinessflag FOREIGN KEY (emergingsmallbusinessflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_emergingsmallbusinessflag FOREIGN KEY (emergingsmallbusinessflag) REFERENCES oc_perennial.flag_value(code),
   hospitalflag CHAR,
-  CONSTRAINT fk_hospitalflag FOREIGN KEY (hospitalflag) REFERENCES flag_value(code),
+  CONSTRAINT fk_hospitalflag FOREIGN KEY (hospitalflag) REFERENCES oc_perennial.flag_value(code),
   contractingofficerbusinesssizedetermination CHAR,
-  CONSTRAINT fk_contractingofficerbusinesssizedetermination FOREIGN KEY (contractingofficerbusinesssizedetermination) REFERENCES business_size(code),
+  CONSTRAINT fk_contractingofficerbusinesssizedetermination FOREIGN KEY (contractingofficerbusinesssizedetermination) REFERENCES oc_perennial.business_size(code),
   is1862landgrantcollege CHAR,
-  CONSTRAINT fk_is1862landgrantcollege FOREIGN KEY (is1862landgrantcollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_is1862landgrantcollege FOREIGN KEY (is1862landgrantcollege) REFERENCES oc_perennial.flag_value(code),
   is1890landgrantcollege CHAR,
-  CONSTRAINT fk_is1890landgrantcollege FOREIGN KEY (is1890landgrantcollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_is1890landgrantcollege FOREIGN KEY (is1890landgrantcollege) REFERENCES oc_perennial.flag_value(code),
   is1994landgrantcollege CHAR,
-  CONSTRAINT fk_is1994landgrantcollege FOREIGN KEY (is1994landgrantcollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_is1994landgrantcollege FOREIGN KEY (is1994landgrantcollege) REFERENCES oc_perennial.flag_value(code),
   isveterinarycollege CHAR,
-  CONSTRAINT fk_isveterinarycollege FOREIGN KEY (isveterinarycollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_isveterinarycollege FOREIGN KEY (isveterinarycollege) REFERENCES oc_perennial.flag_value(code),
   isveterinaryhospital CHAR,
-  CONSTRAINT fk_isveterinaryhospital FOREIGN KEY (isveterinaryhospital) REFERENCES flag_value(code),
+  CONSTRAINT fk_isveterinaryhospital FOREIGN KEY (isveterinaryhospital) REFERENCES oc_perennial.flag_value(code),
   isprivateuniversityorcollege CHAR,
-  CONSTRAINT fk_isprivateuniversityorcollege FOREIGN KEY (isprivateuniversityorcollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_isprivateuniversityorcollege FOREIGN KEY (isprivateuniversityorcollege) REFERENCES oc_perennial.flag_value(code),
   isschoolofforestry CHAR,
-  CONSTRAINT fk_isschoolofforestry FOREIGN KEY (isschoolofforestry) REFERENCES flag_value(code),
+  CONSTRAINT fk_isschoolofforestry FOREIGN KEY (isschoolofforestry) REFERENCES oc_perennial.flag_value(code),
   isstatecontrolledinstitutionofhigherlearning CHAR,
-  CONSTRAINT fk_isstatecontrolledinstitutionofhigherlearning FOREIGN KEY (isstatecontrolledinstitutionofhigherlearning) REFERENCES flag_value(code),
+  CONSTRAINT fk_isstatecontrolledinstitutionofhigherlearning FOREIGN KEY (isstatecontrolledinstitutionofhigherlearning) REFERENCES oc_perennial.flag_value(code),
   isserviceprovider CHAR,
-  CONSTRAINT fk_isserviceprovider FOREIGN KEY (isserviceprovider) REFERENCES flag_value(code),
+  CONSTRAINT fk_isserviceprovider FOREIGN KEY (isserviceprovider) REFERENCES oc_perennial.flag_value(code),
   receivescontracts CHAR,
-  CONSTRAINT fk_receivescontracts FOREIGN KEY (receivescontracts) REFERENCES flag_value(code),
+  CONSTRAINT fk_receivescontracts FOREIGN KEY (receivescontracts) REFERENCES oc_perennial.flag_value(code),
   receivesgrants CHAR,
-  CONSTRAINT fk_receivesgrants FOREIGN KEY (receivesgrants) REFERENCES flag_value(code),
+  CONSTRAINT fk_receivesgrants FOREIGN KEY (receivesgrants) REFERENCES oc_perennial.flag_value(code),
   receivescontractsandgrants CHAR,
-  CONSTRAINT fk_receivescontractsandgrants FOREIGN KEY (receivescontractsandgrants) REFERENCES flag_value(code),
+  CONSTRAINT fk_receivescontractsandgrants FOREIGN KEY (receivescontractsandgrants) REFERENCES oc_perennial.flag_value(code),
   isairportauthority CHAR,
-  CONSTRAINT fk_isairportauthority FOREIGN KEY (isairportauthority) REFERENCES flag_value(code),
+  CONSTRAINT fk_isairportauthority FOREIGN KEY (isairportauthority) REFERENCES oc_perennial.flag_value(code),
   iscouncilofgovernments CHAR,
-  CONSTRAINT fk_iscouncilofgovernments FOREIGN KEY (iscouncilofgovernments) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscouncilofgovernments FOREIGN KEY (iscouncilofgovernments) REFERENCES oc_perennial.flag_value(code),
   ishousingauthoritiespublicortribal CHAR,
-  CONSTRAINT fk_ishousingauthoritiespublicortribal FOREIGN KEY (ishousingauthoritiespublicortribal) REFERENCES flag_value(code),
+  CONSTRAINT fk_ishousingauthoritiespublicortribal FOREIGN KEY (ishousingauthoritiespublicortribal) REFERENCES oc_perennial.flag_value(code),
   isinterstateentity CHAR,
-  CONSTRAINT fk_isinterstateentity FOREIGN KEY (isinterstateentity) REFERENCES flag_value(code),
+  CONSTRAINT fk_isinterstateentity FOREIGN KEY (isinterstateentity) REFERENCES oc_perennial.flag_value(code),
   isplanningcommission CHAR,
-  CONSTRAINT fk_isplanningcommission FOREIGN KEY (isplanningcommission) REFERENCES flag_value(code),
+  CONSTRAINT fk_isplanningcommission FOREIGN KEY (isplanningcommission) REFERENCES oc_perennial.flag_value(code),
   isportauthority CHAR,
-  CONSTRAINT fk_isportauthority FOREIGN KEY (isportauthority) REFERENCES flag_value(code),
+  CONSTRAINT fk_isportauthority FOREIGN KEY (isportauthority) REFERENCES oc_perennial.flag_value(code),
   istransitauthority CHAR,
-  CONSTRAINT fk_istransitauthority FOREIGN KEY (istransitauthority) REFERENCES flag_value(code),
+  CONSTRAINT fk_istransitauthority FOREIGN KEY (istransitauthority) REFERENCES oc_perennial.flag_value(code),
   issubchapterscorporation CHAR,
-  CONSTRAINT fk_issubchapterscorporation FOREIGN KEY (issubchapterscorporation) REFERENCES flag_value(code),
+  CONSTRAINT fk_issubchapterscorporation FOREIGN KEY (issubchapterscorporation) REFERENCES oc_perennial.flag_value(code),
   islimitedliabilitycorporation CHAR,
-  CONSTRAINT fk_islimitedliabilitycorporation FOREIGN KEY (islimitedliabilitycorporation) REFERENCES flag_value(code),
+  CONSTRAINT fk_islimitedliabilitycorporation FOREIGN KEY (islimitedliabilitycorporation) REFERENCES oc_perennial.flag_value(code),
   isforeignownedandlocated CHAR,
-  CONSTRAINT fk_isforeignownedandlocated FOREIGN KEY (isforeignownedandlocated) REFERENCES flag_value(code),
+  CONSTRAINT fk_isforeignownedandlocated FOREIGN KEY (isforeignownedandlocated) REFERENCES oc_perennial.flag_value(code),
   isarchitectureandengineering CHAR,
-  CONSTRAINT fk_isarchitectureandengineering FOREIGN KEY (isarchitectureandengineering) REFERENCES flag_value(code),
+  CONSTRAINT fk_isarchitectureandengineering FOREIGN KEY (isarchitectureandengineering) REFERENCES oc_perennial.flag_value(code),
   isdotcertifieddisadvantagedbusinessenterprise CHAR,
-  CONSTRAINT fk_isdotcertifieddisadvantagedbusinessenterprise FOREIGN KEY (isdotcertifieddisadvantagedbusinessenterprise) REFERENCES flag_value(code),
+  CONSTRAINT fk_isdotcertifieddisadvantagedbusinessenterprise FOREIGN KEY (isdotcertifieddisadvantagedbusinessenterprise) REFERENCES oc_perennial.flag_value(code),
   iscitylocalgovernment CHAR,
-  CONSTRAINT fk_iscitylocalgovernment FOREIGN KEY (iscitylocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscitylocalgovernment FOREIGN KEY (iscitylocalgovernment) REFERENCES oc_perennial.flag_value(code),
   iscommunitydevelopedcorporationownedfirm CHAR,
-  CONSTRAINT fk_iscommunitydevelopedcorporationownedfirm FOREIGN KEY (iscommunitydevelopedcorporationownedfirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscommunitydevelopedcorporationownedfirm FOREIGN KEY (iscommunitydevelopedcorporationownedfirm) REFERENCES oc_perennial.flag_value(code),
   iscommunitydevelopmentcorporation CHAR,
-  CONSTRAINT fk_iscommunitydevelopmentcorporation FOREIGN KEY (iscommunitydevelopmentcorporation) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscommunitydevelopmentcorporation FOREIGN KEY (iscommunitydevelopmentcorporation) REFERENCES oc_perennial.flag_value(code),
   isconstructionfirm CHAR,
-  CONSTRAINT fk_isconstructionfirm FOREIGN KEY (isconstructionfirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_isconstructionfirm FOREIGN KEY (isconstructionfirm) REFERENCES oc_perennial.flag_value(code),
   ismanufacturerofgoods CHAR,
-  CONSTRAINT fk_ismanufacturerofgoods FOREIGN KEY (ismanufacturerofgoods) REFERENCES flag_value(code),
+  CONSTRAINT fk_ismanufacturerofgoods FOREIGN KEY (ismanufacturerofgoods) REFERENCES oc_perennial.flag_value(code),
   iscorporateentitynottaxexempt CHAR,
-  CONSTRAINT fk_iscorporateentitynottaxexempt FOREIGN KEY (iscorporateentitynottaxexempt) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscorporateentitynottaxexempt FOREIGN KEY (iscorporateentitynottaxexempt) REFERENCES oc_perennial.flag_value(code),
   iscountylocalgovernment CHAR,
-  CONSTRAINT fk_iscountylocalgovernment FOREIGN KEY (iscountylocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscountylocalgovernment FOREIGN KEY (iscountylocalgovernment) REFERENCES oc_perennial.flag_value(code),
   isdomesticshelter CHAR,
-  CONSTRAINT fk_isdomesticshelter FOREIGN KEY (isdomesticshelter) REFERENCES flag_value(code),
+  CONSTRAINT fk_isdomesticshelter FOREIGN KEY (isdomesticshelter) REFERENCES oc_perennial.flag_value(code),
   isfederalgovernmentagency CHAR,
-  CONSTRAINT fk_isfederalgovernmentagency FOREIGN KEY (isfederalgovernmentagency) REFERENCES flag_value(code),
+  CONSTRAINT fk_isfederalgovernmentagency FOREIGN KEY (isfederalgovernmentagency) REFERENCES oc_perennial.flag_value(code),
   isfederallyfundedresearchanddevelopmentcorp CHAR,
-  CONSTRAINT fk_isfederallyfundedresearchanddevelopmentcorp FOREIGN KEY (isfederallyfundedresearchanddevelopmentcorp) REFERENCES flag_value(code),
+  CONSTRAINT fk_isfederallyfundedresearchanddevelopmentcorp FOREIGN KEY (isfederallyfundedresearchanddevelopmentcorp) REFERENCES oc_perennial.flag_value(code),
   isforeigngovernment CHAR,
-  CONSTRAINT fk_isforeigngovernment FOREIGN KEY (isforeigngovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_isforeigngovernment FOREIGN KEY (isforeigngovernment) REFERENCES oc_perennial.flag_value(code),
   isindiantribe CHAR,
-  CONSTRAINT fk_isindiantribe FOREIGN KEY (isindiantribe) REFERENCES flag_value(code),
+  CONSTRAINT fk_isindiantribe FOREIGN KEY (isindiantribe) REFERENCES oc_perennial.flag_value(code),
   isintermunicipallocalgovernment CHAR,
-  CONSTRAINT fk_isintermunicipallocalgovernment FOREIGN KEY (isintermunicipallocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_isintermunicipallocalgovernment FOREIGN KEY (isintermunicipallocalgovernment) REFERENCES oc_perennial.flag_value(code),
   isinternationalorganization CHAR,
-  CONSTRAINT fk_isinternationalorganization FOREIGN KEY (isinternationalorganization) REFERENCES flag_value(code),
+  CONSTRAINT fk_isinternationalorganization FOREIGN KEY (isinternationalorganization) REFERENCES oc_perennial.flag_value(code),
   islaborsurplusareafirm CHAR,
-  CONSTRAINT fk_islaborsurplusareafirm FOREIGN KEY (islaborsurplusareafirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_islaborsurplusareafirm FOREIGN KEY (islaborsurplusareafirm) REFERENCES oc_perennial.flag_value(code),
   islocalgovernmentowned CHAR,
-  CONSTRAINT fk_islocalgovernmentowned FOREIGN KEY (islocalgovernmentowned) REFERENCES flag_value(code),
+  CONSTRAINT fk_islocalgovernmentowned FOREIGN KEY (islocalgovernmentowned) REFERENCES oc_perennial.flag_value(code),
   ismunicipalitylocalgovernment CHAR,
-  CONSTRAINT fk_ismunicipalitylocalgovernment FOREIGN KEY (ismunicipalitylocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_ismunicipalitylocalgovernment FOREIGN KEY (ismunicipalitylocalgovernment) REFERENCES oc_perennial.flag_value(code),
   isnativehawaiianownedorganizationorfirm CHAR,
-  CONSTRAINT fk_isnativehawaiianownedorganizationorfirm FOREIGN KEY (isnativehawaiianownedorganizationorfirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_isnativehawaiianownedorganizationorfirm FOREIGN KEY (isnativehawaiianownedorganizationorfirm) REFERENCES oc_perennial.flag_value(code),
   isotherbusinessororganization CHAR,
-  CONSTRAINT fk_isotherbusinessororganization FOREIGN KEY (isotherbusinessororganization) REFERENCES flag_value(code),
+  CONSTRAINT fk_isotherbusinessororganization FOREIGN KEY (isotherbusinessororganization) REFERENCES oc_perennial.flag_value(code),
   isotherminorityowned CHAR,
-  CONSTRAINT fk_isotherminorityowned FOREIGN KEY (isotherminorityowned) REFERENCES flag_value(code),
+  CONSTRAINT fk_isotherminorityowned FOREIGN KEY (isotherminorityowned) REFERENCES oc_perennial.flag_value(code),
   ispartnershiporlimitedliabilitypartnership CHAR,
-  CONSTRAINT fk_ispartnershiporlimitedliabilitypartnership FOREIGN KEY (ispartnershiporlimitedliabilitypartnership) REFERENCES flag_value(code),
+  CONSTRAINT fk_ispartnershiporlimitedliabilitypartnership FOREIGN KEY (ispartnershiporlimitedliabilitypartnership) REFERENCES oc_perennial.flag_value(code),
   isschooldistrictlocalgovernment CHAR,
-  CONSTRAINT fk_isschooldistrictlocalgovernment FOREIGN KEY (isschooldistrictlocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_isschooldistrictlocalgovernment FOREIGN KEY (isschooldistrictlocalgovernment) REFERENCES oc_perennial.flag_value(code),
   issmallagriculturalcooperative CHAR,
-  CONSTRAINT fk_issmallagriculturalcooperative FOREIGN KEY (issmallagriculturalcooperative) REFERENCES flag_value(code),
+  CONSTRAINT fk_issmallagriculturalcooperative FOREIGN KEY (issmallagriculturalcooperative) REFERENCES oc_perennial.flag_value(code),
   issoleproprietorship CHAR,
-  CONSTRAINT fk_issoleproprietorship FOREIGN KEY (issoleproprietorship) REFERENCES flag_value(code),
+  CONSTRAINT fk_issoleproprietorship FOREIGN KEY (issoleproprietorship) REFERENCES oc_perennial.flag_value(code),
   istownshiplocalgovernment CHAR,
-  CONSTRAINT fk_istownshiplocalgovernment FOREIGN KEY (istownshiplocalgovernment) REFERENCES flag_value(code),
+  CONSTRAINT fk_istownshiplocalgovernment FOREIGN KEY (istownshiplocalgovernment) REFERENCES oc_perennial.flag_value(code),
   istriballyownedfirm CHAR,
-  CONSTRAINT fk_istriballyownedfirm FOREIGN KEY (istriballyownedfirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_istriballyownedfirm FOREIGN KEY (istriballyownedfirm) REFERENCES oc_perennial.flag_value(code),
   istribalcollege CHAR,
-  CONSTRAINT fk_istribalcollege FOREIGN KEY (istribalcollege) REFERENCES flag_value(code),
+  CONSTRAINT fk_istribalcollege FOREIGN KEY (istribalcollege) REFERENCES oc_perennial.flag_value(code),
   isalaskannativeownedcorporationorfirm CHAR,
-  CONSTRAINT fk_isalaskannativeownedcorporationorfirm FOREIGN KEY (isalaskannativeownedcorporationorfirm) REFERENCES flag_value(code),
+  CONSTRAINT fk_isalaskannativeownedcorporationorfirm FOREIGN KEY (isalaskannativeownedcorporationorfirm) REFERENCES oc_perennial.flag_value(code),
   iscorporateentitytaxexempt CHAR,
-  CONSTRAINT fk_iscorporateentitytaxexempt FOREIGN KEY (iscorporateentitytaxexempt) REFERENCES flag_value(code),
+  CONSTRAINT fk_iscorporateentitytaxexempt FOREIGN KEY (iscorporateentitytaxexempt) REFERENCES oc_perennial.flag_value(code),
   iswomenownedsmallbusiness CHAR,
-  CONSTRAINT fk_iswomenownedsmallbusiness FOREIGN KEY (iswomenownedsmallbusiness) REFERENCES flag_value(code),
+  CONSTRAINT fk_iswomenownedsmallbusiness FOREIGN KEY (iswomenownedsmallbusiness) REFERENCES oc_perennial.flag_value(code),
   isecondisadvwomenownedsmallbusiness CHAR,
-  CONSTRAINT fk_isecondisadvwomenownedsmallbusiness FOREIGN KEY (isecondisadvwomenownedsmallbusiness) REFERENCES flag_value(code),
+  CONSTRAINT fk_isecondisadvwomenownedsmallbusiness FOREIGN KEY (isecondisadvwomenownedsmallbusiness) REFERENCES oc_perennial.flag_value(code),
   isjointventurewomenownedsmallbusiness CHAR,
-  CONSTRAINT fk_isjointventurewomenownedsmallbusiness FOREIGN KEY (isjointventurewomenownedsmallbusiness) REFERENCES flag_value(code),
+  CONSTRAINT fk_isjointventurewomenownedsmallbusiness FOREIGN KEY (isjointventurewomenownedsmallbusiness) REFERENCES oc_perennial.flag_value(code),
   isjointventureecondisadvwomenownedsmallbusiness CHAR,
-  CONSTRAINT fk_isjointventureecondisadvwomenownedsmallbusiness FOREIGN KEY (isjointventureecondisadvwomenownedsmallbusiness) REFERENCES flag_value(code),
+  CONSTRAINT fk_isjointventureecondisadvwomenownedsmallbusiness FOREIGN KEY (isjointventureecondisadvwomenownedsmallbusiness) REFERENCES oc_perennial.flag_value(code),
   walsh_healy_act CHAR,
-  CONSTRAINT fk_walsh_healy_act FOREIGN KEY (walsh_healy_act) REFERENCES walsh_healy_act(code),
+  CONSTRAINT fk_walsh_healy_act FOREIGN KEY (walsh_healy_act) REFERENCES oc_perennial.walsh_healy_act(code),
   service_contract_act CHAR,
-  CONSTRAINT fk_service_contract_act FOREIGN KEY (service_contract_act) REFERENCES service_contract_act(code),
+  CONSTRAINT fk_service_contract_act FOREIGN KEY (service_contract_act) REFERENCES oc_perennial.service_contract_act(code),
   davis_bacon_act CHAR,
-  CONSTRAINT fk_davis_bacon_act FOREIGN KEY (davis_bacon_act) REFERENCES davis_bacon_act(code),
+  CONSTRAINT fk_davis_bacon_act FOREIGN KEY (davis_bacon_act) REFERENCES oc_perennial.davis_bacon_act(code),
   clinger_cohen_act CHAR,
-  CONSTRAINT fk_clinger_cohen_act FOREIGN KEY (clinger_cohen_act) REFERENCES clinger_cohen_act(code),
+  CONSTRAINT fk_clinger_cohen_act FOREIGN KEY (clinger_cohen_act) REFERENCES oc_perennial.clinger_cohen_act(code),
   other_statutory_authority TEXT,
   prime_awardee_executive1 TEXT,
   prime_awardee_executive1_compensation MONEY,
@@ -7336,389 +7350,7 @@ CREATE TABLE IF NOT EXISTS contract_all (
   prime_awardee_executive5 TEXT,
   prime_awardee_executive5_compensation MONEY,
   interagency_contracting_authority CHAR,
-  CONSTRAINT fk_interagency_contracting_authority FOREIGN KEY (interagency_contracting_authority) REFERENCES interagency_contracting_authority(code)
+  CONSTRAINT fk_interagency_contracting_authority FOREIGN KEY (interagency_contracting_authority) REFERENCES oc_perennial.interagency_contracting_authority(code)
 );
 
-
-CREATE TABLE IF NOT EXISTS contract (
-  id SERIAL CONSTRAINT pk_contract PRIMARY KEY,
-  unique_transaction_id VARCHAR(32) NOT NULL,
-  last_modified_date DATE NOT NULL,
-  CONSTRAINT u_contract unique (unique_transaction_id),
-  transaction_status VARCHAR(6),
-  CONSTRAINT fk2_transaction_status FOREIGN KEY (transaction_status) REFERENCES transaction_status(status),
-  dollars_obligated MONEY,
-  base_and_exercised_options_value MONEY,
-  base_and_all_options_value MONEY,
-  contracting_department_id VARCHAR(4),
-  contracting_department_name TEXT,
-  contracting_agency_id VARCHAR(4),
-  contracting_agency_name TEXT,
-  contracting_agency_id_redundant VARCHAR(4),
-  contracting_agency_name_redundant TEXT,
-  contracting_office_id VARCHAR(6),
-  contracting_office_name TEXT,
-  funding_department_id VARCHAR(4),
-  funding_department_name TEXT,
-  funding_agency_id VARCHAR(4),
-  funding_agency_name TEXT,
-  funding_office_id VARCHAR(6),
-  funding_office_name TEXT,
-  funded_by_foreign_entity CHAR,
-  CONSTRAINT fk2_funded_by_foreign_entity FOREIGN KEY (funded_by_foreign_entity) REFERENCES funded_by_foreign_entity(code),
-  signed_date DATE,
-  effective_date DATE,
-  current_completion_date DATE,
-  ultimate_completion_date DATE,
-  last_date_to_order DATE,
-  contract_action_type VARCHAR(8),
-  CONSTRAINT fk2_contract_action_type FOREIGN KEY (contract_action_type) REFERENCES contract_action_type (code),
-  reason_for_modification CHAR,
-  CONSTRAINT fk2_reason_for_modification FOREIGN KEY (reason_for_modification) REFERENCES reason_for_modification (code),
-  type_of_contract_pricing VARCHAR(2),
-  CONSTRAINT fk2_type_of_contract_pricing FOREIGN KEY (type_of_contract_pricing) REFERENCES type_of_contract_pricing (code),
-  price_evaluation_percent_difference REAL,
-  subcontract_plan CHAR,
-  CONSTRAINT fk2_subcontract_plan FOREIGN KEY (subcontract_plan) REFERENCES subcontract_plan (code),
-  letter_contract CHAR,
-  CONSTRAINT fk2_letter_contract FOREIGN KEY (letter_contract) REFERENCES letter_contract (code),
-  multiyear_contract CHAR,
-  CONSTRAINT fk2_multiyear_contract FOREIGN KEY (multiyear_contract) REFERENCES multiyear_contract (code),
-  performance_based_service_contract CHAR,
-  CONSTRAINT fk2_performance_based_service_contract FOREIGN KEY (performance_based_service_contract) REFERENCES performance_based_service_contract (code),
-  major_program_code TEXT,
-  contingency_humanitarian_peacekeeping_operation CHAR,
-  CONSTRAINT fk2_contingency_humanitarian_peacekeeping_operation FOREIGN KEY (contingency_humanitarian_peacekeeping_operation) REFERENCES contingency_humanitarian_peacekeeping_operation (code),
-  contract_financing CHAR,
-  CONSTRAINT fk2_contract_financing FOREIGN KEY (contract_financing) REFERENCES contract_financing (code),
-  cost_or_pricing_data CHAR,
-  CONSTRAINT fk2_cost_or_pricing_data FOREIGN KEY (cost_or_pricing_data) REFERENCES cost_or_pricing_data(code),
-  cost_accounting_standards_clause CHAR,
-  CONSTRAINT fk2_cost_accounting_standards_clause FOREIGN KEY (cost_accounting_standards_clause) REFERENCES cost_accounting_standards_clause(code),
-  descriptionofcontractrequirement TEXT,
-  purchase_card_as_payment_method CHAR,
-  CONSTRAINT fk2_purchase_card_as_payment_method FOREIGN KEY (purchase_card_as_payment_method) REFERENCES purchase_card_as_payment_method(code),
-  number_of_actions INTEGER,
-  national_interest_action VARCHAR(4),
-  CONSTRAINT fk2_national_interest_action FOREIGN KEY (national_interest_action) REFERENCES national_interest_action(code),
-  prog_source_agency VARCHAR(2),
-  prog_source_account VARCHAR(4),
-  prog_source_subacct VARCHAR(3),
-  account_title TEXT,
-  recovery_flag VARCHAR(4),
-  CONSTRAINT fk2_recovery_flag FOREIGN KEY (recovery_flag) REFERENCES recovery_flag(code),
-  type_of_idc CHAR,
-  CONSTRAINT fk2_type_of_idc FOREIGN KEY (type_of_idc) REFERENCES type_of_idc(code),
-  multiple_or_single_award_idc CHAR,
-  CONSTRAINT fk2_multiple_or_single_award_idc FOREIGN KEY (multiple_or_single_award_idc) REFERENCES multiple_or_single_award_idc(code),
-  program_acronym TEXT,
-  contractor_name TEXT,
-  contractor_alternate_name TEXT,
-  contractor_legal_organization_name TEXT,
-  contractor_doing_as_business_name TEXT,
-  contractor_division_name TEXT,
-  contractor_division_number_or_office_code TEXT,
-  contractor_enabled TEXT,
-  contractor_location_disable_flag TEXT,
-  contractor_ccr_exception CHAR,
-  CONSTRAINT fk2_contractor_ccr_exception FOREIGN KEY (contractor_ccr_exception) REFERENCES ccr_exception(code),
-  contractor_street_address_1 TEXT,
-  contractor_street_address_2 TEXT,
-  contractor_street_address_3 TEXT,
-  contractor_city TEXT,
-  contractor_state VARCHAR(2),
-  CONSTRAINT fk2_contractor_state FOREIGN KEY (contractor_state) REFERENCES state(code),
-  contractor_other_location_info TEXT,
-  contractor_state_other_info_redundant TEXT,
-  contractor_zip_code TEXT,
-  contractor_country VARCHAR(3),
-  CONSTRAINT fk2_country FOREIGN KEY (contractor_country) REFERENCES country(code),
-  contractor_congressional_district VARCHAR(4),
-  contractor_congressional_district_redundant VARCHAR(4),
-  contractor_site_code TEXT,
-  contractor_alternate_site_code TEXT,
-  contractor_duns_number VARCHAR(9),
-  contractor_parent_duns_number VARCHAR(9),
-  contractor_phone_number TEXT,
-  contractor_fax_number TEXT,
-  contractor_registration_date DATE,
-  contractor_renewal_date DATE,
-  contractor_parent_name TEXT,
-  location_code TEXT,
-  place_of_performance_city TEXT,
-  place_of_performance_state VARCHAR(2),
-  CONSTRAINT fk2_place_of_performance_state FOREIGN KEY (place_of_performance_state) REFERENCES state(code),
-  place_of_performance_state_redundant VARCHAR(2),
-  CONSTRAINT fk2_place_of_performance_state_redundant FOREIGN KEY (place_of_performance_state_redundant) REFERENCES state(code),
-  place_of_performance_country VARCHAR(3),
-  CONSTRAINT fk2_place_of_performance_country FOREIGN KEY (place_of_performance_country) REFERENCES country(code),
-  place_of_performance_zip_code TEXT,
-  place_of_performance_congressional_district VARCHAR(4),
-  place_of_performance_congressional_district_redundant VARCHAR(4),
-  product_or_service_category VARCHAR(2),
-  CONSTRAINT fk2_product_or_service_category FOREIGN KEY (product_or_service_category) REFERENCES product_or_service_category(code),
-  product_or_service_code VARCHAR(4),
-  CONSTRAINT fk2_product_or_service_code FOREIGN KEY (product_or_service_code) REFERENCES product_or_service_code(code),
-  system_or_equipment_code VARCHAR(4),
-  system_or_equipment_description TEXT,
-  claimant_program VARCHAR(3),
-  CONSTRAINT fk2_claimant_program FOREIGN KEY (claimant_program) REFERENCES claimant_program(code),
-  naics VARCHAR(6),
-  CONSTRAINT fk2_naics FOREIGN KEY (naics) REFERENCES naics(code),
-  information_technology_commercial_item_category CHAR,
-  CONSTRAINT fk2_information_technology_commercial_item_category FOREIGN KEY (information_technology_commercial_item_category) REFERENCES information_technology_commercial_item_category(code),
-  gfe_gfp CHAR,
-  CONSTRAINT fk2_gfe_gfp FOREIGN KEY (gfe_gfp) REFERENCES gfe_gfp(code),
-  use_of_epa_designated_products CHAR,
-  CONSTRAINT fk2_use_of_epa_designated_products FOREIGN KEY (use_of_epa_designated_products) REFERENCES use_of_epa_designated_products(code),
-  recovered_material_clauses CHAR,
-  CONSTRAINT fk2_recovered_material_clauses FOREIGN KEY (recovered_material_clauses) REFERENCES recovered_material_clauses(code),
-  sea_transportation CHAR,
-  CONSTRAINT fk2_sea_transportation FOREIGN KEY (sea_transportation) REFERENCES sea_transportation(code),
-  contract_bundling CHAR,
-  CONSTRAINT fk2_contract_bundling FOREIGN KEY (contract_bundling) REFERENCES contract_bundling(code),
-  consolidated_contract CHAR,
-  CONSTRAINT fk2_consolidated_contract FOREIGN KEY (consolidated_contract) REFERENCES consolidated_contract(code),
-  country_of_origin VARCHAR(3),
-  CONSTRAINT fk2_country_of_origin FOREIGN KEY (country_of_origin) REFERENCES country(code),
-  place_of_manufacture CHAR,
-  CONSTRAINT fk2_place_of_manufacture FOREIGN KEY (place_of_manufacture) REFERENCES place_of_manufacture(code),
-  manufacturing_organization_type CHAR,
-  CONSTRAINT fk2_manufacturing_organization_type FOREIGN KEY (manufacturing_organization_type) REFERENCES manufacturing_organization_type(code),
-  agency_id VARCHAR(4),
-  agency_name TEXT,
-  piid TEXT,
-  modification_number TEXT,
-  transaction_number TEXT,
-  fiscal_year VARCHAR(4),
-  idv_agency_id VARCHAR(4),
-  idv_piid TEXT,
-  idv_modification_number TEXT,
-  solicitation_id TEXT,
-  extent_competed VARCHAR(3),
-  CONSTRAINT fk2_extent_competed FOREIGN KEY (extent_competed) REFERENCES extent_competed(code),
-  reason_not_competed VARCHAR(3),
-  CONSTRAINT fk2_reason_not_competed FOREIGN KEY (reason_not_competed) REFERENCES reason_not_competed(code),
-  number_of_offers_received INTEGER,
-  commercial_item_acquisition_procedures CHAR,
-  CONSTRAINT fk2_commercial_item_acquisition_procedures FOREIGN KEY (commercial_item_acquisition_procedures) REFERENCES commercial_item_acquisition_procedures(code),
-  commercial_item_test_program CHAR,
-  CONSTRAINT fk2_commercial_item_test_program FOREIGN KEY (commercial_item_test_program) REFERENCES commercial_item_test_program(code),
-  small_business_competitiveness_demonstration_program CHAR,
-  CONSTRAINT fk2_small_business_competitiveness_demonstration_program FOREIGN KEY (small_business_competitiveness_demonstration_program) REFERENCES small_business_competitiveness_demonstration_program(code),
-  a76action CHAR,
-  CONSTRAINT fk2_a76action FOREIGN KEY (a76action) REFERENCES a76action(code),
-  competitive_procedures TEXT,
-  solicitation_procedures VARCHAR(4),
-  CONSTRAINT fk2_solicitation_procedures FOREIGN KEY (solicitation_procedures) REFERENCES solicitation_procedures(code),
-  type_of_set_aside VARCHAR(8),
-  CONSTRAINT fk2_type_of_set_aside FOREIGN KEY (type_of_set_aside) REFERENCES type_of_set_aside(code),
-  local_area_set_aside CHAR,
-  CONSTRAINT fk2_local_area_set_aside FOREIGN KEY (local_area_set_aside) REFERENCES local_area_set_aside(code),
-  evaluated_preference VARCHAR(4),
-  CONSTRAINT fk2_evaluated_preference FOREIGN KEY (evaluated_preference) REFERENCES evaluated_preference(code),
-  fedbizopps CHAR,
-  CONSTRAINT fk2_fedbizopps FOREIGN KEY (fedbizopps) REFERENCES fedbizopps(code),
-  research VARCHAR(3),
-  CONSTRAINT fk2_research FOREIGN KEY (research) REFERENCES research(code),
-  statutory_exception_to_fair_opportunity VARCHAR(4),
-  CONSTRAINT fk2_statutory_exception_to_fair_opportunity FOREIGN KEY (statutory_exception_to_fair_opportunity) REFERENCES statutory_exception_to_fair_opportunity(code),
-  contractor_organizational_type TEXT,
-  contractor_number_of_employees BIGINT,
-  contractor_annual_revenue MONEY,
-  firm8aflag CHAR,
-  CONSTRAINT fk2_firm8aflag FOREIGN KEY (firm8aflag) REFERENCES flag_value(code),
-  hubzoneflag CHAR,
-  CONSTRAINT fk2_hubzoneflag FOREIGN KEY (hubzoneflag) REFERENCES flag_value(code),
-  sdbflag CHAR,
-  CONSTRAINT fk2_sdbflag FOREIGN KEY (sdbflag) REFERENCES flag_value(code),
-  issbacertifiedsmalldisadvantagedbusiness CHAR,
-  CONSTRAINT fk2_issbacertifiedsmalldisadvantagedbusiness FOREIGN KEY (issbacertifiedsmalldisadvantagedbusiness) REFERENCES flag_value(code),
-  shelteredworkshopflag CHAR,
-  CONSTRAINT fk2_shelteredworkshopflag FOREIGN KEY (shelteredworkshopflag) REFERENCES flag_value(code),
-  hbcuflag CHAR,
-  CONSTRAINT fk2_hbcuflag FOREIGN KEY (hbcuflag) REFERENCES flag_value(code),
-  educationalinstitutionflag CHAR,
-  CONSTRAINT fk2_educationalinstitutionflag FOREIGN KEY (educationalinstitutionflag) REFERENCES flag_value(code),
-  womenownedflag CHAR,
-  CONSTRAINT fk2_womenownedflag FOREIGN KEY (womenownedflag) REFERENCES flag_value(code),
-  veteranownedflag CHAR,
-  CONSTRAINT fk2_veteranownedflag FOREIGN KEY (veteranownedflag) REFERENCES flag_value(code),
-  srdvobflag CHAR,
-  CONSTRAINT fk2_srdvobflag FOREIGN KEY (srdvobflag) REFERENCES flag_value(code),
-  localgovernmentflag CHAR,
-  CONSTRAINT fk2_localgovernmentflag FOREIGN KEY (localgovernmentflag) REFERENCES flag_value(code),
-  minorityinstitutionflag CHAR,
-  CONSTRAINT fk2_minorityinstitutionflag FOREIGN KEY (minorityinstitutionflag) REFERENCES flag_value(code),
-  aiobflag CHAR,
-  CONSTRAINT fk2_aiobflag FOREIGN KEY (aiobflag) REFERENCES flag_value(code),
-  stategovernmentflag CHAR,
-  CONSTRAINT fk2_stategovernmentflag FOREIGN KEY (stategovernmentflag) REFERENCES flag_value(code),
-  federalgovernmentflag CHAR,
-  CONSTRAINT fk2_federalgovernmentflag FOREIGN KEY (federalgovernmentflag) REFERENCES flag_value(code),
-  minorityownedbusinessflag CHAR,
-  CONSTRAINT fk2_minorityownedbusinessflag FOREIGN KEY (minorityownedbusinessflag) REFERENCES flag_value(code),
-  apaobflag CHAR,
-  CONSTRAINT fk2_apaobflag FOREIGN KEY (apaobflag) REFERENCES flag_value(code),
-  tribalgovernmentflag CHAR,
-  CONSTRAINT fk2_tribalgovernmentflag FOREIGN KEY (tribalgovernmentflag) REFERENCES flag_value(code),
-  baobflag CHAR,
-  CONSTRAINT fk2_baobflag FOREIGN KEY (baobflag) REFERENCES flag_value(code),
-  naobflag CHAR,
-  CONSTRAINT fk2_naobflag FOREIGN KEY (naobflag) REFERENCES flag_value(code),
-  saaobflag CHAR,
-  CONSTRAINT fk2_saaobflag FOREIGN KEY (saaobflag) REFERENCES flag_value(code),
-  nonprofitorganizationflag CHAR,
-  CONSTRAINT fk2_nonprofitorganizationflag FOREIGN KEY (nonprofitorganizationflag) REFERENCES flag_value(code),
-  isothernotforprofitorganization CHAR,
-  CONSTRAINT fk2_isothernotforprofitorganization FOREIGN KEY (isothernotforprofitorganization) REFERENCES flag_value(code),
-  isforprofitorganization CHAR,
-  CONSTRAINT fk2_isforprofitorganization FOREIGN KEY (isforprofitorganization) REFERENCES flag_value(code),
-  isfoundation CHAR,
-  CONSTRAINT fk2_isfoundation FOREIGN KEY (isfoundation) REFERENCES flag_value(code),
-  haobflag CHAR,
-  CONSTRAINT fk2_haobflag FOREIGN KEY (haobflag) REFERENCES flag_value(code),
-  ishispanicservicinginstitution CHAR,
-  CONSTRAINT fk2_ishispanicservicinginstitution FOREIGN KEY (ishispanicservicinginstitution) REFERENCES flag_value(code),
-  emergingsmallbusinessflag CHAR,
-  CONSTRAINT fk2_emergingsmallbusinessflag FOREIGN KEY (emergingsmallbusinessflag) REFERENCES flag_value(code),
-  hospitalflag CHAR,
-  CONSTRAINT fk2_hospitalflag FOREIGN KEY (hospitalflag) REFERENCES flag_value(code),
-  contractingofficerbusinesssizedetermination CHAR,
-  CONSTRAINT fk2_contractingofficerbusinesssizedetermination FOREIGN KEY (contractingofficerbusinesssizedetermination) REFERENCES business_size(code),
-  is1862landgrantcollege CHAR,
-  CONSTRAINT fk2_is1862landgrantcollege FOREIGN KEY (is1862landgrantcollege) REFERENCES flag_value(code),
-  is1890landgrantcollege CHAR,
-  CONSTRAINT fk2_is1890landgrantcollege FOREIGN KEY (is1890landgrantcollege) REFERENCES flag_value(code),
-  is1994landgrantcollege CHAR,
-  CONSTRAINT fk2_is1994landgrantcollege FOREIGN KEY (is1994landgrantcollege) REFERENCES flag_value(code),
-  isveterinarycollege CHAR,
-  CONSTRAINT fk2_isveterinarycollege FOREIGN KEY (isveterinarycollege) REFERENCES flag_value(code),
-  isveterinaryhospital CHAR,
-  CONSTRAINT fk2_isveterinaryhospital FOREIGN KEY (isveterinaryhospital) REFERENCES flag_value(code),
-  isprivateuniversityorcollege CHAR,
-  CONSTRAINT fk2_isprivateuniversityorcollege FOREIGN KEY (isprivateuniversityorcollege) REFERENCES flag_value(code),
-  isschoolofforestry CHAR,
-  CONSTRAINT fk2_isschoolofforestry FOREIGN KEY (isschoolofforestry) REFERENCES flag_value(code),
-  isstatecontrolledinstitutionofhigherlearning CHAR,
-  CONSTRAINT fk2_isstatecontrolledinstitutionofhigherlearning FOREIGN KEY (isstatecontrolledinstitutionofhigherlearning) REFERENCES flag_value(code),
-  isserviceprovider CHAR,
-  CONSTRAINT fk2_isserviceprovider FOREIGN KEY (isserviceprovider) REFERENCES flag_value(code),
-  receivescontracts CHAR,
-  CONSTRAINT fk2_receivescontracts FOREIGN KEY (receivescontracts) REFERENCES flag_value(code),
-  receivesgrants CHAR,
-  CONSTRAINT fk2_receivesgrants FOREIGN KEY (receivesgrants) REFERENCES flag_value(code),
-  receivescontractsandgrants CHAR,
-  CONSTRAINT fk2_receivescontractsandgrants FOREIGN KEY (receivescontractsandgrants) REFERENCES flag_value(code),
-  isairportauthority CHAR,
-  CONSTRAINT fk2_isairportauthority FOREIGN KEY (isairportauthority) REFERENCES flag_value(code),
-  iscouncilofgovernments CHAR,
-  CONSTRAINT fk2_iscouncilofgovernments FOREIGN KEY (iscouncilofgovernments) REFERENCES flag_value(code),
-  ishousingauthoritiespublicortribal CHAR,
-  CONSTRAINT fk2_ishousingauthoritiespublicortribal FOREIGN KEY (ishousingauthoritiespublicortribal) REFERENCES flag_value(code),
-  isinterstateentity CHAR,
-  CONSTRAINT fk2_isinterstateentity FOREIGN KEY (isinterstateentity) REFERENCES flag_value(code),
-  isplanningcommission CHAR,
-  CONSTRAINT fk2_isplanningcommission FOREIGN KEY (isplanningcommission) REFERENCES flag_value(code),
-  isportauthority CHAR,
-  CONSTRAINT fk2_isportauthority FOREIGN KEY (isportauthority) REFERENCES flag_value(code),
-  istransitauthority CHAR,
-  CONSTRAINT fk2_istransitauthority FOREIGN KEY (istransitauthority) REFERENCES flag_value(code),
-  issubchapterscorporation CHAR,
-  CONSTRAINT fk2_issubchapterscorporation FOREIGN KEY (issubchapterscorporation) REFERENCES flag_value(code),
-  islimitedliabilitycorporation CHAR,
-  CONSTRAINT fk2_islimitedliabilitycorporation FOREIGN KEY (islimitedliabilitycorporation) REFERENCES flag_value(code),
-  isforeignownedandlocated CHAR,
-  CONSTRAINT fk2_isforeignownedandlocated FOREIGN KEY (isforeignownedandlocated) REFERENCES flag_value(code),
-  isarchitectureandengineering CHAR,
-  CONSTRAINT fk2_isarchitectureandengineering FOREIGN KEY (isarchitectureandengineering) REFERENCES flag_value(code),
-  isdotcertifieddisadvantagedbusinessenterprise CHAR,
-  CONSTRAINT fk2_isdotcertifieddisadvantagedbusinessenterprise FOREIGN KEY (isdotcertifieddisadvantagedbusinessenterprise) REFERENCES flag_value(code),
-  iscitylocalgovernment CHAR,
-  CONSTRAINT fk2_iscitylocalgovernment FOREIGN KEY (iscitylocalgovernment) REFERENCES flag_value(code),
-  iscommunitydevelopedcorporationownedfirm CHAR,
-  CONSTRAINT fk2_iscommunitydevelopedcorporationownedfirm FOREIGN KEY (iscommunitydevelopedcorporationownedfirm) REFERENCES flag_value(code),
-  iscommunitydevelopmentcorporation CHAR,
-  CONSTRAINT fk2_iscommunitydevelopmentcorporation FOREIGN KEY (iscommunitydevelopmentcorporation) REFERENCES flag_value(code),
-  isconstructionfirm CHAR,
-  CONSTRAINT fk2_isconstructionfirm FOREIGN KEY (isconstructionfirm) REFERENCES flag_value(code),
-  ismanufacturerofgoods CHAR,
-  CONSTRAINT fk2_ismanufacturerofgoods FOREIGN KEY (ismanufacturerofgoods) REFERENCES flag_value(code),
-  iscorporateentitynottaxexempt CHAR,
-  CONSTRAINT fk2_iscorporateentitynottaxexempt FOREIGN KEY (iscorporateentitynottaxexempt) REFERENCES flag_value(code),
-  iscountylocalgovernment CHAR,
-  CONSTRAINT fk2_iscountylocalgovernment FOREIGN KEY (iscountylocalgovernment) REFERENCES flag_value(code),
-  isdomesticshelter CHAR,
-  CONSTRAINT fk2_isdomesticshelter FOREIGN KEY (isdomesticshelter) REFERENCES flag_value(code),
-  isfederalgovernmentagency CHAR,
-  CONSTRAINT fk2_isfederalgovernmentagency FOREIGN KEY (isfederalgovernmentagency) REFERENCES flag_value(code),
-  isfederallyfundedresearchanddevelopmentcorp CHAR,
-  CONSTRAINT fk2_isfederallyfundedresearchanddevelopmentcorp FOREIGN KEY (isfederallyfundedresearchanddevelopmentcorp) REFERENCES flag_value(code),
-  isforeigngovernment CHAR,
-  CONSTRAINT fk2_isforeigngovernment FOREIGN KEY (isforeigngovernment) REFERENCES flag_value(code),
-  isindiantribe CHAR,
-  CONSTRAINT fk2_isindiantribe FOREIGN KEY (isindiantribe) REFERENCES flag_value(code),
-  isintermunicipallocalgovernment CHAR,
-  CONSTRAINT fk2_isintermunicipallocalgovernment FOREIGN KEY (isintermunicipallocalgovernment) REFERENCES flag_value(code),
-  isinternationalorganization CHAR,
-  CONSTRAINT fk2_isinternationalorganization FOREIGN KEY (isinternationalorganization) REFERENCES flag_value(code),
-  islaborsurplusareafirm CHAR,
-  CONSTRAINT fk2_islaborsurplusareafirm FOREIGN KEY (islaborsurplusareafirm) REFERENCES flag_value(code),
-  islocalgovernmentowned CHAR,
-  CONSTRAINT fk2_islocalgovernmentowned FOREIGN KEY (islocalgovernmentowned) REFERENCES flag_value(code),
-  ismunicipalitylocalgovernment CHAR,
-  CONSTRAINT fk2_ismunicipalitylocalgovernment FOREIGN KEY (ismunicipalitylocalgovernment) REFERENCES flag_value(code),
-  isnativehawaiianownedorganizationorfirm CHAR,
-  CONSTRAINT fk2_isnativehawaiianownedorganizationorfirm FOREIGN KEY (isnativehawaiianownedorganizationorfirm) REFERENCES flag_value(code),
-  isotherbusinessororganization CHAR,
-  CONSTRAINT fk2_isotherbusinessororganization FOREIGN KEY (isotherbusinessororganization) REFERENCES flag_value(code),
-  isotherminorityowned CHAR,
-  CONSTRAINT fk2_isotherminorityowned FOREIGN KEY (isotherminorityowned) REFERENCES flag_value(code),
-  ispartnershiporlimitedliabilitypartnership CHAR,
-  CONSTRAINT fk2_ispartnershiporlimitedliabilitypartnership FOREIGN KEY (ispartnershiporlimitedliabilitypartnership) REFERENCES flag_value(code),
-  isschooldistrictlocalgovernment CHAR,
-  CONSTRAINT fk2_isschooldistrictlocalgovernment FOREIGN KEY (isschooldistrictlocalgovernment) REFERENCES flag_value(code),
-  issmallagriculturalcooperative CHAR,
-  CONSTRAINT fk2_issmallagriculturalcooperative FOREIGN KEY (issmallagriculturalcooperative) REFERENCES flag_value(code),
-  issoleproprietorship CHAR,
-  CONSTRAINT fk2_issoleproprietorship FOREIGN KEY (issoleproprietorship) REFERENCES flag_value(code),
-  istownshiplocalgovernment CHAR,
-  CONSTRAINT fk2_istownshiplocalgovernment FOREIGN KEY (istownshiplocalgovernment) REFERENCES flag_value(code),
-  istriballyownedfirm CHAR,
-  CONSTRAINT fk2_istriballyownedfirm FOREIGN KEY (istriballyownedfirm) REFERENCES flag_value(code),
-  istribalcollege CHAR,
-  CONSTRAINT fk2_istribalcollege FOREIGN KEY (istribalcollege) REFERENCES flag_value(code),
-  isalaskannativeownedcorporationorfirm CHAR,
-  CONSTRAINT fk2_isalaskannativeownedcorporationorfirm FOREIGN KEY (isalaskannativeownedcorporationorfirm) REFERENCES flag_value(code),
-  iscorporateentitytaxexempt CHAR,
-  CONSTRAINT fk2_iscorporateentitytaxexempt FOREIGN KEY (iscorporateentitytaxexempt) REFERENCES flag_value(code),
-  iswomenownedsmallbusiness CHAR,
-  CONSTRAINT fk2_iswomenownedsmallbusiness FOREIGN KEY (iswomenownedsmallbusiness) REFERENCES flag_value(code),
-  isecondisadvwomenownedsmallbusiness CHAR,
-  CONSTRAINT fk2_isecondisadvwomenownedsmallbusiness FOREIGN KEY (isecondisadvwomenownedsmallbusiness) REFERENCES flag_value(code),
-  isjointventurewomenownedsmallbusiness CHAR,
-  CONSTRAINT fk2_isjointventurewomenownedsmallbusiness FOREIGN KEY (isjointventurewomenownedsmallbusiness) REFERENCES flag_value(code),
-  isjointventureecondisadvwomenownedsmallbusiness CHAR,
-  CONSTRAINT fk2_isjointventureecondisadvwomenownedsmallbusiness FOREIGN KEY (isjointventureecondisadvwomenownedsmallbusiness) REFERENCES flag_value(code),
-  walsh_healy_act CHAR,
-  CONSTRAINT fk2_walsh_healy_act FOREIGN KEY (walsh_healy_act) REFERENCES walsh_healy_act(code),
-  service_contract_act CHAR,
-  CONSTRAINT fk2_service_contract_act FOREIGN KEY (service_contract_act) REFERENCES service_contract_act(code),
-  davis_bacon_act CHAR,
-  CONSTRAINT fk2_davis_bacon_act FOREIGN KEY (davis_bacon_act) REFERENCES davis_bacon_act(code),
-  clinger_cohen_act CHAR,
-  CONSTRAINT fk2_clinger_cohen_act FOREIGN KEY (clinger_cohen_act) REFERENCES clinger_cohen_act(code),
-  other_statutory_authority TEXT,
-  prime_awardee_executive1 TEXT,
-  prime_awardee_executive1_compensation MONEY,
-  prime_awardee_executive2 TEXT,
-  prime_awardee_executive2_compensation MONEY,
-  prime_awardee_executive3 TEXT,
-  prime_awardee_executive3_compensation MONEY,
-  prime_awardee_executive4 TEXT,
-  prime_awardee_executive4_compensation MONEY,
-  prime_awardee_executive5 TEXT,
-  prime_awardee_executive5_compensation MONEY,
-  interagency_contracting_authority CHAR,
-  CONSTRAINT fk2_interagency_contracting_authority FOREIGN KEY (interagency_contracting_authority) REFERENCES interagency_contracting_authority(code)
-);
+COMMIT;

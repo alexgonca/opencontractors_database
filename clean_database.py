@@ -7,6 +7,7 @@ import csv
 import re
 from time import strftime
 import os
+import errno
 
 #
 # Some constants
@@ -1315,7 +1316,11 @@ args = parser.parse_args()
 
 print(strftime("%Y-%m-%d %H:%M:%S"))
 
-os.makedirs(os.path.dirname(os.path.abspath(args.destination)), exist_ok=True)
+try:
+    os.makedirs(os.path.dirname(os.path.abspath(args.destination)))
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
 
 with open(args.destination, 'wb') as csv_out:
     writer = csv.DictWriter(csv_out, fieldnames = NEW_FIELDS)

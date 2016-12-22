@@ -655,7 +655,8 @@ NEW_FIELDS = [
     'contractor_street_address_3',
     'contractor_city',
     'contractor_state',
-    'contractor_state_redundant',
+    'contractor_other_location_info',
+    'contractor_state_other_info_redundant',
     'contractor_zip_code',
     'contractor_country',
     'contractor_congressional_district',
@@ -1090,8 +1091,7 @@ def transform_row(record):
     new_record['multiyear_contract'] = left_text_and_upper(record['multiyearcontract'])
     new_record['performance_based_service_contract'] = performance_based_service_contract(record['performancebasedservicecontract'])
     new_record['major_program_code'] = nullify_text(record['majorprogramcode'])
-    new_record['contingency_humanitarian_peacekeeping_operation'] = left_text_and_upper(
-        record['contingencyhumanitarianpeacekeepingoperation'])
+    new_record['contingency_humanitarian_peacekeeping_operation'] = left_text_and_upper(record['contingencyhumanitarianpeacekeepingoperation'])
     new_record['contract_financing'] = contract_financing(record['contractfinancing'])
     new_record['cost_or_pricing_data'] = left_text_and_upper(record['costorpricingdata'])
     new_record['cost_accounting_standards_clause'] = nullify_text(record['costaccountingstandardsclause'])
@@ -1142,8 +1142,7 @@ def transform_row(record):
     new_record['place_of_performance_state_redundant'] = validate_state(record['statecode'])
     new_record['place_of_performance_country'] = validate_country(record['placeofperformancecountrycode'])
     new_record['place_of_performance_zip_code'] = nullify_text(record['placeofperformancezipcode'])
-    new_record['place_of_performance_congressional_district'] = upper_case(nullify_text(
-        record['placeofperformancecongressionaldistrict']))
+    new_record['place_of_performance_congressional_district'] = upper_case(nullify_text(record['placeofperformancecongressionaldistrict']))
     new_record['place_of_performance_congressional_district_redundant'] = upper_case(nullify_text(record['pop_cd']))
     new_record['product_or_service_category'] = nullify_text(record['psc_cat'])
     new_record['product_or_service_code'] = left_text_and_upper(record['productorservicecode'])
@@ -1151,8 +1150,7 @@ def transform_row(record):
     new_record['system_or_equipment_description'] = right_text_and_upper(record['systemequipmentcode'])
     new_record['claimant_program'] = claimant_program(record['claimantprogramcode'])
     new_record['naics'] = left_text_and_upper(record['principalnaicscode'])
-    new_record['information_technology_commercial_item_category'] = left_text_and_upper(
-        record['informationtechnologycommercialitemcategory'])
+    new_record['information_technology_commercial_item_category'] = left_text_and_upper(record['informationtechnologycommercialitemcategory'])
     new_record['gfe_gfp'] = left_text_and_upper(record['gfe_gfp'])
     new_record['use_of_epa_designated_products'] = left_text_and_upper(record['useofepadesignatedproducts'])
     new_record['recovered_material_clauses'] = left_text_and_upper(record['recoveredmaterialclauses'])
@@ -1177,8 +1175,7 @@ def transform_row(record):
     new_record['number_of_offers_received'] = nullify_text(record['numberofoffersreceived'])
     new_record['commercial_item_acquisition_procedures'] = left_text_and_upper(record['commercialitemacquisitionprocedures'])
     new_record['commercial_item_test_program'] = left_text_and_upper(record['commercialitemtestprogram'])
-    new_record['small_business_competitiveness_demonstration_program'] = left_text_and_upper(
-        record['smallbusinesscompetitivenessdemonstrationprogram'])
+    new_record['small_business_competitiveness_demonstration_program'] = left_text_and_upper(record['smallbusinesscompetitivenessdemonstrationprogram'])
     new_record['a76action'] = a76action(record['a76action'])
     new_record['competitive_procedures'] = nullify_text(record['competitiveprocedures'])
     new_record['solicitation_procedures'] = solicitation_procedures(record['solicitationprocedures'])
@@ -1194,8 +1191,7 @@ def transform_row(record):
     new_record['firm8aflag'] = nullify_text(record['firm8aflag'])
     new_record['hubzoneflag'] = nullify_text(record['hubzoneflag'])
     new_record['sdbflag'] = nullify_text(record['sdbflag'])
-    new_record['issbacertifiedsmalldisadvantagedbusiness'] = nullify_text(
-        record['issbacertifiedsmalldisadvantagedbusiness'])
+    new_record['issbacertifiedsmalldisadvantagedbusiness'] = nullify_text(record['issbacertifiedsmalldisadvantagedbusiness'])
     new_record['shelteredworkshopflag'] = nullify_text(record['shelteredworkshopflag'])
     new_record['hbcuflag'] = nullify_text(record['hbcuflag'])
     new_record['educationalinstitutionflag'] = nullify_text(record['educationalinstitutionflag'])
@@ -1221,8 +1217,7 @@ def transform_row(record):
     new_record['ishispanicservicinginstitution'] = nullify_text(record['ishispanicservicinginstitution'])
     new_record['emergingsmallbusinessflag'] = nullify_text(record['emergingsmallbusinessflag'])
     new_record['hospitalflag'] = nullify_text(record['hospitalflag'])
-    new_record['contractingofficerbusinesssizedetermination'] = left_text_and_upper(
-        record['contractingofficerbusinesssizedetermination'])
+    new_record['contractingofficerbusinesssizedetermination'] = left_text_and_upper(record['contractingofficerbusinesssizedetermination'])
     new_record['is1862landgrantcollege'] = nullify_text(record['is1862landgrantcollege'])
     new_record['is1890landgrantcollege'] = nullify_text(record['is1890landgrantcollege'])
     new_record['is1994landgrantcollege'] = nullify_text(record['is1994landgrantcollege'])
@@ -1230,8 +1225,7 @@ def transform_row(record):
     new_record['isveterinaryhospital'] = nullify_text(record['isveterinaryhospital'])
     new_record['isprivateuniversityorcollege'] = nullify_text(record['isprivateuniversityorcollege'])
     new_record['isschoolofforestry'] = nullify_text(record['isschoolofforestry'])
-    new_record['isstatecontrolledinstitutionofhigherlearning'] = nullify_text(
-        record['isstatecontrolledinstitutionofhigherlearning'])
+    new_record['isstatecontrolledinstitutionofhigherlearning'] = nullify_text(record['isstatecontrolledinstitutionofhigherlearning'])
     new_record['isserviceprovider'] = nullify_text(record['isserviceprovider'])
     new_record['receivescontracts'] = nullify_text(record['receivescontracts'])
     new_record['receivesgrants'] = nullify_text(record['receivesgrants'])
@@ -1247,11 +1241,9 @@ def transform_row(record):
     new_record['islimitedliabilitycorporation'] = nullify_text(record['islimitedliabilitycorporation'])
     new_record['isforeignownedandlocated'] = nullify_text(record['isforeignownedandlocated'])
     new_record['isarchitectureandengineering'] = nullify_text(record['isarchitectureandengineering'])
-    new_record['isdotcertifieddisadvantagedbusinessenterprise'] = is_dot_certified(
-        record['isdotcertifieddisadvantagedbusinessenterprise'])
+    new_record['isdotcertifieddisadvantagedbusinessenterprise'] = is_dot_certified(record['isdotcertifieddisadvantagedbusinessenterprise'])
     new_record['iscitylocalgovernment'] = nullify_text(record['iscitylocalgovernment'])
-    new_record['iscommunitydevelopedcorporationownedfirm'] = nullify_text(
-        record['iscommunitydevelopedcorporationownedfirm'])
+    new_record['iscommunitydevelopedcorporationownedfirm'] = nullify_text(record['iscommunitydevelopedcorporationownedfirm'])
     new_record['iscommunitydevelopmentcorporation'] = nullify_text(record['iscommunitydevelopmentcorporation'])
     new_record['isconstructionfirm'] = nullify_text(record['isconstructionfirm'])
     new_record['ismanufacturerofgoods'] = nullify_text(record['ismanufacturerofgoods'])
@@ -1259,8 +1251,7 @@ def transform_row(record):
     new_record['iscountylocalgovernment'] = nullify_text(record['iscountylocalgovernment'])
     new_record['isdomesticshelter'] = nullify_text(record['isdomesticshelter'])
     new_record['isfederalgovernmentagency'] = nullify_text(record['isfederalgovernmentagency'])
-    new_record['isfederallyfundedresearchanddevelopmentcorp'] = nullify_text(
-        record['isfederallyfundedresearchanddevelopmentcorp'])
+    new_record['isfederallyfundedresearchanddevelopmentcorp'] = nullify_text(record['isfederallyfundedresearchanddevelopmentcorp'])
     new_record['isforeigngovernment'] = nullify_text(record['isforeigngovernment'])
     new_record['isindiantribe'] = nullify_text(record['isindiantribe'])
     new_record['isintermunicipallocalgovernment'] = nullify_text(record['isintermunicipallocalgovernment'])
@@ -1268,12 +1259,10 @@ def transform_row(record):
     new_record['islaborsurplusareafirm'] = nullify_text(record['islaborsurplusareafirm'])
     new_record['islocalgovernmentowned'] = nullify_text(record['islocalgovernmentowned'])
     new_record['ismunicipalitylocalgovernment'] = nullify_text(record['ismunicipalitylocalgovernment'])
-    new_record['isnativehawaiianownedorganizationorfirm'] = nullify_text(
-        record['isnativehawaiianownedorganizationorfirm'])
+    new_record['isnativehawaiianownedorganizationorfirm'] = nullify_text(record['isnativehawaiianownedorganizationorfirm'])
     new_record['isotherbusinessororganization'] = nullify_text(record['isotherbusinessororganization'])
     new_record['isotherminorityowned'] = nullify_text(record['isotherminorityowned'])
-    new_record['ispartnershiporlimitedliabilitypartnership'] = nullify_text(
-        record['ispartnershiporlimitedliabilitypartnership'])
+    new_record['ispartnershiporlimitedliabilitypartnership'] = nullify_text(record['ispartnershiporlimitedliabilitypartnership'])
     new_record['isschooldistrictlocalgovernment'] = nullify_text(record['isschooldistrictlocalgovernment'])
     new_record['issmallagriculturalcooperative'] = nullify_text(record['issmallagriculturalcooperative'])
     new_record['issoleproprietorship'] = nullify_text(record['issoleproprietorship'])
@@ -1285,8 +1274,7 @@ def transform_row(record):
     new_record['iswomenownedsmallbusiness'] = nullify_text(record['iswomenownedsmallbusiness'])
     new_record['isecondisadvwomenownedsmallbusiness'] = nullify_text(record['isecondisadvwomenownedsmallbusiness'])
     new_record['isjointventurewomenownedsmallbusiness'] = nullify_text(record['isjointventurewomenownedsmallbusiness'])
-    new_record['isjointventureecondisadvwomenownedsmallbusiness'] = nullify_text(
-        record['isjointventureecondisadvwomenownedsmallbusiness'])
+    new_record['isjointventureecondisadvwomenownedsmallbusiness'] = nullify_text(record['isjointventureecondisadvwomenownedsmallbusiness'])
     new_record['walsh_healy_act'] = left_text_and_upper(record['walshhealyact'])
     new_record['service_contract_act'] = left_text_and_upper(record['servicecontractact'])
     new_record['davis_bacon_act'] = left_text_and_upper(record['davisbaconact'])

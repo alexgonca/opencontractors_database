@@ -3,6 +3,7 @@ import glob
 import csv
 import re
 from time import strftime
+import os
 
 #
 # Some constants
@@ -1310,6 +1311,8 @@ parser.add_argument('destination',
 args = parser.parse_args()
 
 print(strftime("%Y-%m-%d %H:%M:%S"))
+
+os.makedirs(os.path.dirname(os.path.abspath(args.destination)), exist_ok=True)
 
 with open(args.destination, 'wb') as csv_out:
     writer = csv.DictWriter(csv_out, fieldnames = NEW_FIELDS)

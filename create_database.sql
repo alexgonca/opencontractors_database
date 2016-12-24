@@ -22,11 +22,11 @@ ON CONFLICT (onerow_id)
 DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS oc_perennial.transaction_status (
-  status VARCHAR(6) CONSTRAINT pk_transaction_status PRIMARY KEY
+  status VARCHAR(8) CONSTRAINT pk_transaction_status PRIMARY KEY
 );
 
 INSERT INTO oc_perennial.transaction_status (status)
-VALUES ('active')
+VALUES ('active'),('inactive')
 ON CONFLICT (status)
 DO NOTHING;
 
@@ -664,9 +664,19 @@ VALUES
 ON CONFLICT (code)
 DO NOTHING;
 
+
 INSERT INTO oc_perennial.country_variation
 (code, name)
 VALUES
+('ABW', 'ARUBA [NETHERLANDS]'),
+('NCL', 'NEW CALEDONIA [FRANCE]'),
+('GIB', 'GIBRALTAR [UNITED KINGDOM]'),
+('GRL', 'GREENLAND [DENMARK]'),
+('GUM', 'GUAM [UNITED STATES]'),
+('TWN', 'TAIWAN,PROVINCE OF CHINA'),
+('PRI', 'PUERTO RICO [UNITED STATES]'),
+('BMU', 'BERMUDA [UNITED KINGDOM]'),
+('VGB', 'BRITISH VIRGIN ISLANDS [UNITED KINGDOM]'),
 ('ABW', 'ARUBA'),
 ('AFG', 'AFGHANISTAN'),
 ('AGO', 'ANGOLA'),
@@ -6975,7 +6985,7 @@ CREATE TABLE IF NOT EXISTS oc_perennial.contract_all (
   unique_transaction_id VARCHAR(32) NOT NULL,
   last_modified_date DATE NOT NULL,
   CONSTRAINT u_contract unique (unique_transaction_id, last_modified_date),
-  transaction_status VARCHAR(6),
+  transaction_status VARCHAR(8),
   CONSTRAINT fk_transaction_status FOREIGN KEY (transaction_status) REFERENCES oc_perennial.transaction_status(status),
   dollars_obligated MONEY,
   base_and_exercised_options_value MONEY,

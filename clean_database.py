@@ -917,6 +917,8 @@ def validate_country(text):
             }.get(left_text, left_text)
         else:
             text = COUNTRIES.get(left_text, text)
+            if len(text) > 3:
+                print('Warning! Unknown country: "{}"'.format(text))
     return text
 
 #

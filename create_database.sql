@@ -6474,13 +6474,17 @@ CREATE TABLE IF NOT EXISTS oc_perennial.contract_bundling
 
 INSERT INTO oc_perennial.contract_bundling
 (code, name, description) VALUES
-('A', 'Mission Critical', 'Agency has determined that the consolidated requirements is critical to the agency''s mission, but the measurably substantial benefits do not meet the thresholds set forth in the FAR 7.107 to determine that the consolidation is necessary and justified.'),
-('B', 'OMB Circular A-76', 'Agency used the OMB Circular A-76 process to determine that the consolidation of the requirements is necessary and justified rather than applying the substantial benefits analysis required by FAR 7.107.'),
-('C', 'Other', 'Requirement is "bundled" and Codes A and B do not apply.'),
-('D', 'Not a bundled requirement', 'Not a bundled requirement'),
+('A', 'Mission Critical', 'Agency has determined that the consolidated requirements is critical to the agency''s mission, but the measurably substantial benefits do not meet the thresholds set forth in the FAR 7.107 to determine that the consolidation is necessary and justified. This value will no longer be able to be selected on or later than February 3, 2017.'),
+('B', 'OMB Circular A-76', 'Agency used the OMB Circular A-76 process to determine that the consolidation of the requirements is necessary and justified rather than applying the substantial benefits analysis required by FAR 7.107. This value will no longer be able to be selected on or later than February 3, 2017.'),
+('C', 'Other', 'Requirement is "bundled" and Codes A and B do not apply. This value will no longer be able to be selected on or later than February 3, 2017.'),
+('D', 'Not a bundled requirement', 'Not a bundled requirement. This value will no longer be able to be selected on or later than February 3, 2017.'),
+('E', 'Bundled Requirements', 'Requirements meet the definition of "Bundling" at FAR 2.101. These values can be selected on or later than February 3, 2017.'),
+('F', 'Substantially Bundled Requirements', 'Requirements meet the definition of "Bundling" at FAR 2.101 but has an estimated value outlined at FAR 7.107-4 Substantial Bundling. These values can be selected on or later than February 3, 2017.'),
+('G', 'Bundled Requirements Under a FAR 7.107-1(b) Exception', 'Requirements meet the definition of "Bundling" at FAR 2.101 but do not require a written determination in accordance with FAR 7.107-1(b). These values can be selected on or later than February 3, 2017.'),
+('H', 'Not Bundled', 'Requirements do not meet the definition of "Bundling" at FAR 2.101. These values can be selected on or later than February 3, 2017.'),
 ('N', 'Invalid option.', 'Error in usaspending.gov.')
 ON CONFLICT (code)
-DO NOTHING;
+DO UPDATE SET description = EXCLUDED.description;
 
 CREATE TABLE IF NOT EXISTS oc_perennial.consolidated_contract
 (

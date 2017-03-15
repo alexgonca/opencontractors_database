@@ -924,7 +924,11 @@ def validate_country(text):
                 'US:': 'USA',
                 'US': 'USA',
                 'KOS': 'XKS',
-                'SJM': 'XSV'
+                'SJM': 'XSV',
+                'PW': 'PLW',
+                'VA1': 'USA',
+                'PG1': None,
+                'WAK': 'UMI'
             }.get(left_text, left_text)
         else:
             text = COUNTRIES.get(left_text, text)

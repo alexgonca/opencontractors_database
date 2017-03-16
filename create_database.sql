@@ -660,7 +660,8 @@ VALUES
 ('ZAF', 'SOUTH AFRICA'),
 ('ZMB', 'ZAMBIA'),
 ('ZWE', 'ZIMBABWE'),
-('ZZZ', 'NONDISTRIBUTED')
+('ZZZ', 'NONDISTRIBUTED'),
+('XXX' ,'INVALID CODE - ERROR IN USASPENDING')
 ON CONFLICT (code)
 DO NOTHING;
 
@@ -6495,10 +6496,14 @@ CREATE TABLE IF NOT EXISTS oc_perennial.consolidated_contract
 
 INSERT INTO oc_perennial.consolidated_contract
 (code, name, description) VALUES
-('Y', 'Yes', 'Contract action is: (1) for a contract or order awarded by DoD or with DoD funding (2) with an estimated total value that exceeds the threshold and (3) the action is a consolidation of contract requirements.'),
-('N', 'No', 'Contract or order is not funded by DoD, or contract or order: (1) has an estimated total value less than or equal to the threshold; (2) has been reported as a Bundled Contract or (3) is not a consolidation of contract requirements.')
+('Y', 'Yes', 'Contract action is: (1) for a contract or order awarded by DoD or with DoD funding (2) with an estimated total value that exceeds the threshold and (3) the action is a consolidation of contract requirements. This value can only be selected when then "Date Signed" is on or before February 2, 2017.'),
+('N', 'No', 'Contract or order is not funded by DoD, or contract or order: (1) has an estimated total value less than or equal to the threshold; (2) has been reported as a Bundled Contract or (3) is not a consolidation of contract requirements. This value can only be selected when then "Date Signed" is on or before February 2, 2017.'),
+  ('A', 'Consolidated Requirements', 'Requirements meet the definition of "Consolidation" or "consolidated requirement" at FAR 2.101 but a written determination was not made because 1) the estimated value of the requirements were at or below $2 million OR 2) the requirements are bundled and a written determination for bundling is required. This value can only be selected when then "Date Signed" is on or later than February 3, 2017.'),
+  ('B', 'Consolidated Requirements with Written Determination', 'Requirements meet the definition of "Consolidation" or "consolidated requirement" at FAR 2.101 and a Written Determination is made in accordance with FAR 7.107-2. This value can only be selected when then "Date Signed" is on or later than February 3, 2017.'),
+  ('C', 'Consolidated Requirements Under FAR 7.107-1(b) Exception', 'Requirements meet the definition of "Consolidation" or "consolidated requirement" at FAR 2.101 but do not require a written determination in accordance with FAR 7.107-1(b). This value can only be selected when then "Date Signed" is on or later than February 3, 2017.'),
+  ('D', 'Not Consolidated', 'Requirements do not meet the definition of "Consolidation" or "consolidated requirement" at FAR 2.101. This value can only be selected when then "Date Signed" is on or later than February 3, 2017.')
 ON CONFLICT (code)
-DO NOTHING;
+DO UPDATE SET description = EXCLUDED.description;
 
 CREATE TABLE IF NOT EXISTS oc_perennial.place_of_manufacture
 (

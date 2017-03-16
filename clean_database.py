@@ -930,6 +930,8 @@ def validate_country(text):
                 'PG1': None,
                 'WAK': 'UMI'
             }.get(left_text, left_text)
+            if (text is not None) and (text not in COUNTRIES.values()):
+                print('Warning! Unknown country code: "{}"'.format(text))
         else:
             text = COUNTRIES.get(left_text, text)
             if len(text) > 3:

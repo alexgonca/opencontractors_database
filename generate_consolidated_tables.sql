@@ -37,7 +37,7 @@ BEGIN
   );
   SELECT max(last_modified_date)
   INTO last_modified_date_aux
-  FROM contract_all;
+  FROM oc_perennial.contract_all;
   INSERT INTO data_version
   (last_modified_date)
   VALUES (last_modified_date_aux);

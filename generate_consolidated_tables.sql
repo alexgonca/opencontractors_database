@@ -799,7 +799,7 @@ BEGIN
     last           DATE,
     CONSTRAINT u_contractor_business_size UNIQUE (duns_number, business_size),
     CONSTRAINT fk_contractor_business_size_duns FOREIGN KEY (duns_number) REFERENCES contractor (duns_number),
-    CONSTRAINT fk_contractor_business_size FOREIGN KEY (business_size) REFERENCES business_size (code)
+    CONSTRAINT fk_contractor_business_size FOREIGN KEY (business_size) REFERENCES oc_perennial.business_size (code)
   );
 
   INSERT INTO contractor_business_size
@@ -825,7 +825,7 @@ BEGIN
     last           DATE,
     CONSTRAINT u_contractor_ccr_exception UNIQUE (duns_number, ccr_exception),
     CONSTRAINT fk_contractor_ccr_exception_duns FOREIGN KEY (duns_number) REFERENCES contractor (duns_number),
-    CONSTRAINT fk_contractor_ccr_exception FOREIGN KEY (ccr_exception) REFERENCES ccr_exception (code)
+    CONSTRAINT fk_contractor_ccr_exception FOREIGN KEY (ccr_exception) REFERENCES oc_perennial.ccr_exception (code)
   );
 
   INSERT INTO contractor_ccr_exception
@@ -908,8 +908,8 @@ BEGIN
     first                  DATE,
     last                   DATE,
     CONSTRAINT fk_contractor_address FOREIGN KEY (duns_number) REFERENCES contractor (duns_number),
-    CONSTRAINT fk_contractor_address_country FOREIGN KEY (country_code) REFERENCES country (code),
-    CONSTRAINT fk_contractor_address_state FOREIGN KEY (state) REFERENCES state(code)
+    CONSTRAINT fk_contractor_address_country FOREIGN KEY (country_code) REFERENCES oc_perennial.country (code),
+    CONSTRAINT fk_contractor_address_state FOREIGN KEY (state) REFERENCES oc_perennial.state(code)
   );
 
   CREATE UNIQUE INDEX u_contractor_address_with_country_with_state
@@ -972,8 +972,8 @@ BEGIN
     last        DATE,
     CONSTRAINT u_contractor_flag UNIQUE (duns_number, flag_name, flag_value),
     CONSTRAINT fk_contractor_flag FOREIGN KEY (duns_number) REFERENCES contractor (duns_number),
-    CONSTRAINT fk_contractor_flag_flag FOREIGN KEY (flag_name) REFERENCES flag (flag_name),
-    CONSTRAINT fk_contractor_flag_value FOREIGN KEY (flag_value) REFERENCES flag_value (code)
+    CONSTRAINT fk_contractor_flag_flag FOREIGN KEY (flag_name) REFERENCES oc_perennial.flag (flag_name),
+    CONSTRAINT fk_contractor_flag_value FOREIGN KEY (flag_value) REFERENCES oc_perennial.flag_value (code)
   );
 
   FOR flag_aux IN SELECT flag_name FROM flag LOOP

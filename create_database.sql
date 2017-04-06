@@ -7383,4 +7383,6 @@ CREATE TABLE IF NOT EXISTS oc_perennial.contract_all (
   CONSTRAINT fk_interagency_contracting_authority FOREIGN KEY (interagency_contracting_authority) REFERENCES oc_perennial.interagency_contracting_authority(code)
 );
 
+ALTER DATABASE small_opencontractors SET SEARCH_PATH TO public, oc_perennial, oc_ephemeral_alpha;
+
 COMMIT;

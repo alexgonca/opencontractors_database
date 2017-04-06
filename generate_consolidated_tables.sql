@@ -976,7 +976,7 @@ BEGIN
     CONSTRAINT fk_contractor_flag_value FOREIGN KEY (flag_value) REFERENCES oc_perennial.flag_value (code)
   );
 
-  FOR flag_aux IN SELECT flag_name FROM flag LOOP
+  FOR flag_aux IN SELECT flag_name FROM oc_perennial.flag LOOP
     EXECUTE format('INSERT INTO contractor_flag '                                  ||
                    '(duns_number, flag_name, flag_value, frequency, first, last) ' ||
                    'select '                                                       ||
@@ -1026,9 +1026,9 @@ BEGIN
   create index idx_contracting_agency_top_products_and_services on contracting_agency_top_products_and_services(contracting_agency_id);
 
   IF active_schema_aux = 'oc_ephemeral_alpha' THEN
-    SET SEARCH_PATH TO public, oc_perennial, oc_ephemeral_alpha;
+    ALTER DATABASE opencontractors SET SEARCH_PATH TO public, oc_perennial, oc_ephemeral_alpha;
   ELSE
-    SET SEARCH_PATH TO public, oc_perennial, oc_ephemeral_beta;
+    ALTER DATABASE opencontractors SET SEARCH_PATH TO public, oc_perennial, oc_ephemeral_beta;
   END IF;
 END
 $consolidated_tables$ LANGUAGE plpgsql;

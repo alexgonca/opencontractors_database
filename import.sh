@@ -1,6 +1,24 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+if ! hash zip 2>/dev/null; then
+  echo "zip is not installed. Aborting."
+  exit 1
+fi
+
+if ! hash unzip 2>/dev/null; then
+  echo "unzip is not installed. Aborting."
+  exit 1
+fi
+
+if ! hash psql 2>/dev/null; then
+  echo "psql is not installed. Aborting."
+  exit 1
+fi
+
+psql -c "\i create_database.sql"
 
 for ((year=2000;year<=2015;year++)); do
+    curl -f http://download.usaspending.gov/data_archives/201505/csv/${year}_DOD_Contracts_Full_20150515.csv.zip --create-dirs -o ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip
     if [ -f ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip ]; then
         unzip -j ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip -d ./usaspending/201505
         python clean_database.py ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv ./processed/201505/201505_${year}_oc.csv
@@ -27,6 +45,7 @@ for ((year_file=2015;year_file<=current_year;year_file++)); do
     fi
     while [ $month -le $final_month ]; do
         for ((year=2000;year<=year_file+1;year++)); do
+            curl -f http://download.usaspending.gov/data_archives/${year_file}$(printf %02d $month)/csv/${year}_DOD_Contracts_Delta_${year_file}$(printf %02d $month)15.csv.zip --create-dirs -o ./usaspending/${year_file}$(printf %02d $month)/${year}_DOD_Contracts_Delta_${year_file}$(printf %02d $month)15.csv.zip
             if [ -f ./usaspending/${year_file}$(printf %02d $month)/${year}_DOD_Contracts_Delta_${year_file}$(printf %02d $month)15.csv.zip ]; then
                 unzip -j ./usaspending/${year_file}$(printf %02d $month)/${year}_DOD_Contracts_Delta_${year_file}$(printf %02d $month)15.csv.zip -d ./usaspending/${year_file}$(printf %02d $month)
                 python clean_database.py ./usaspending/${year_file}$(printf %02d $month)/${year}_DOD_Contracts_Delta_${year_file}$(printf %02d $month)15.csv ./processed/${year_file}$(printf %02d $month)/${year_file}$(printf %02d $month)_${year}_oc.csv
@@ -38,3 +57,6 @@ for ((year_file=2015;year_file<=current_year;year_file++)); do
     done
     month=1
 done
+
+psql -c "\i generate_consolidated_tables.sql"
+

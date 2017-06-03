@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+for ((year=2000;year<=2015;year++)); do
+    curl -f http://download.usaspending.gov/data_archives/201505/csv/${year}_DOD_Contracts_Full_20150515.csv.zip --create-dirs -o ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip
+done
+
 day=$(date +'%d')
 if [ "$((day))" -ge 15 ] ; then
     current_month=$(date +'%m')
@@ -25,6 +29,3 @@ for ((year_file=2015;year_file<=current_year;year_file++)); do
     month=1
 done
 
-for ((year=2000;year<=2015;year++)); do
-    curl -f http://download.usaspending.gov/data_archives/201505/csv/${year}_DOD_Contracts_Full_20150515.csv.zip --create-dirs -o ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip
-done

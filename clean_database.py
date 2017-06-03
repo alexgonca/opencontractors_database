@@ -1323,31 +1323,32 @@ def transform_row(record):
     return new_record
 
 
-# obtain the args provided by the user
-parser = argparse.ArgumentParser()
-parser.add_argument('csv_files',
-                    help="Path to CSV files from usaspending.gov.")
-parser.add_argument('destination',
-                    help="File with the cleaned data.")
-args = parser.parse_args()
+if __name__ == "__main__":
+    # obtain the args provided by the user
+    parser = argparse.ArgumentParser()
+    parser.add_argument('csv_files',
+                        help="Path to CSV files from usaspending.gov.")
+    parser.add_argument('destination',
+                        help="File with the cleaned data.")
+    args = parser.parse_args()
 
-print(strftime("%Y-%m-%d %H:%M:%S"))
+    print(strftime("%Y-%m-%d %H:%M:%S"))
 
-try:
-    os.makedirs(os.path.dirname(os.path.abspath(args.destination)))
-except OSError as e:
-    if e.errno != errno.EEXIST:
-        raise
+    try:
+        os.makedirs(os.path.dirname(os.path.abspath(args.destination)))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
-with open(args.destination, 'wb') as csv_out:
-    writer = csv.DictWriter(csv_out, fieldnames = NEW_FIELDS)
-    writer.writeheader()
-    for filename in glob.glob(args.csv_files):
-        print (filename)
-        with open(filename, 'rb') as csv_in:
-            for row in csv.DictReader(csv_in):
-                writer.writerow(transform_row(row))
+    with open(args.destination, 'wb') as csv_out:
+        writer = csv.DictWriter(csv_out, fieldnames = NEW_FIELDS)
+        writer.writeheader()
+        for filename in glob.glob(args.csv_files):
+            print (filename)
+            with open(filename, 'rb') as csv_in:
+                for row in csv.DictReader(csv_in):
+                    writer.writerow(transform_row(row))
 
-print('Done!')
+    print('Done!')
 
-print(strftime("%Y-%m-%d %H:%M:%S"))
+    print(strftime("%Y-%m-%d %H:%M:%S"))

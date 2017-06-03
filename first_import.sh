@@ -1,22 +1,25 @@
 #!/bin/bash
 
+# Test if zip, unzip and postgresql are installed.
 if ! hash zip 2>/dev/null; then
   echo "zip is not installed. Aborting."
   exit 1
 fi
-
 if ! hash unzip 2>/dev/null; then
   echo "unzip is not installed. Aborting."
   exit 1
 fi
-
 if ! hash psql 2>/dev/null; then
   echo "psql is not installed. Aborting."
   exit 1
 fi
 
+# Create tables on database.
 psql -c "\i create_database.sql"
 
+# Download all full files from May 2015.
+# That is the first month that data is still available.
+# For each dowloaded file, unzip, clean and import into postgresql.
 for ((year=2000;year<=2015;year++)); do
     curl -f http://download.usaspending.gov/data_archives/201505/csv/${year}_DOD_Contracts_Full_20150515.csv.zip --create-dirs -o ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip
     if [ -f ./usaspending/201505/${year}_DOD_Contracts_Full_20150515.csv.zip ]; then
@@ -27,6 +30,8 @@ for ((year=2000;year<=2015;year++)); do
     fi
 done
 
+# If current day of the month < 15 then download all delta files up to LAST month.
+# If current day of the month >= 15 then download all delta files up to CURRENT month.
 day=$(date +'%d')
 if [ "$((day))" -ge 15 ] ; then
     current_month=$(date +'%m')
@@ -36,6 +41,7 @@ else
     current_year=$(date -d "$d - 30 days" +%Y)
 fi
 
+# For all months from 06/2015 to current month: download, clean and import all delta files into postgresql.
 month=6
 for ((year_file=2015;year_file<=current_year;year_file++)); do
     if [ $current_year -eq $year_file ] ; then
@@ -58,5 +64,8 @@ for ((year_file=2015;year_file<=current_year;year_file++)); do
     month=1
 done
 
+# Create function to generate consolidated tables on database.
 psql -c "\i generate_consolidated_tables.sql"
 
+# Execute the aforementioned function.
+psql -c "select oc_perennial.generate_consolidated_tables();"

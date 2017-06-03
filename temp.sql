@@ -17,7 +17,7 @@ select contracting_agency_id,
         END) as year_2004,
     sum(CASE WHEN fiscal_year = '2005' THEN dollars_obligated
         ELSE cast(0 as MONEY)
-        END) as year_2005,
+         END) as year_2005,
     sum(CASE WHEN fiscal_year = '2006' THEN dollars_obligated
         ELSE cast(0 as MONEY)
         END) as year_2006,

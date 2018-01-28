@@ -9,5 +9,5 @@ command="\copy anything to program 'gzip > ./athena/anything.gz' with csv"
 for i in "${array[@]}"
 do
     psql -h localhost -U postgres -d opencontractors -c "${command//anything/$i}"
-    s3cmd --continue-put put ./athena/deparment_name.gz s3://opencontractors/${i}/${i}.gz
+    s3cmd --continue-put put ./athena/${i}.gz s3://opencontractors/${i}/${i}.gz
 done

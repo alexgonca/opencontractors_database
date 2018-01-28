@@ -5,7 +5,7 @@ a76action
 active_schema
 )
 
-command = "\copy anything to program 'gzip > ./athena/anything.gz' with csv"
+command="\copy anything to program 'gzip > ./athena/anything.gz' with csv"
 for i in "${array[@]}"
 do
     psql -h localhost -U postgres -d opencontractors -c "${command/anything/$i}"

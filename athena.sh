@@ -8,7 +8,6 @@ active_schema
 command="\copy anything to program 'gzip > ./athena/anything.gz' with csv"
 for i in "${array[@]}"
 do
-    psql -h localhost -U postgres -d opencontractors -c "${command/anything/$i}"
+    psql -h localhost -U postgres -d opencontractors -c "${command//anything/$i}"
     s3cmd --continue-put put ./athena/deparment_name.gz s3://opencontractors/${i}/${i}.gz
-	echo $i
 done
